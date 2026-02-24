@@ -1,0 +1,23 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Style login role dropdown/select options with yellow background",
+  "requirements": [
+    {
+      "id": "REQ-12",
+      "summary": "Style the SELECT SYSTEM ROLE dropdown options with yellow (#FFD700) background and black text to match the yellow/gold theme of other form elements on the Login page",
+      "acceptanceCriteria": [
+        "The SELECT SYSTEM ROLE dropdown's visible option items (Administrator, Librarian, Faculty Member, Student Representative, and the placeholder 'Identify your role') display with a #FFD700 yellow background and black text when the dropdown is open.",
+        "The closed/selected state of the dropdown also shows yellow background with black text, consistent with other form inputs on the Login page.",
+        "No other styling on the Login page is altered by this change."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/LoginPage.tsx",
+          "operation": "modify",
+          "description": "Update the SELECT SYSTEM ROLE dropdown styling to apply yellow (#FFD700) background and black text to all option elements and the select element itself. Add inline styles or Tailwind classes to ensure both the closed/selected state and the open options list display with the yellow background. Ensure the styling matches the existing yellow/gold theme already present on other form inputs without altering any other page elements or layout."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+
+    /* Deep Navy Primary */
+    --primary: 0.22 0.07 255;
+    --primary-foreground: 0.98 0.01 90;
+
+    /* Gold Accent */
+    --accent: 0.72 0.14 75;
+    --accent-foreground: 0.15 0.04 255;
+
+    /* Warm Off-White Background */
+    --background: 0.98 0.005 90;
+    --foreground: 0.18 0.04 255;
+
+    /* Card */
+    --card: 1 0 0;
+    --card-foreground: 0.18 0.04 255;
+
+    /* Popover */
+    --popover: 1 0 0;
+    --popover-foreground: 0.18 0.04 255;
+
+    /* Secondary */
+    --secondary: 0.94 0.02 255;
+    --secondary-foreground: 0.22 0.07 255;
+
+    /* Muted */
+    --muted: 0.94 0.01 255;
+    --muted-foreground: 0.48 0.04 255;
+
+    /* Destructive */
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.98 0 0;
+
+    /* Border / Input / Ring */
+    --border: 0.88 0.02 255;
+    --input: 0.88 0.02 255;
+    --ring: 0.22 0.07 255;
+
+    /* Charts */
+    --chart-1: 0.646 0.222 41.116;
+    --chart-2: 0.6 0.118 184.704;
+    --chart-3: 0.398 0.07 227.392;
+    --chart-4: 0.828 0.189 84.429;
+    --chart-5: 0.769 0.188 70.08;
+
+    /* Sidebar */
+    --sidebar: 0.22 0.07 255;
+    --sidebar-foreground: 0.98 0.01 90;
+    --sidebar-primary: 0.72 0.14 75;
+    --sidebar-primary-foreground: 0.15 0.04 255;
+    --sidebar-accent: 0.28 0.07 255;
+    --sidebar-accent-foreground: 0.98 0.01 90;
+    --sidebar-border: 0.30 0.07 255;
+    --sidebar-ring: 0.72 0.14 75;
+
+    /* Custom tokens */
+    --navy: 0.22 0.07 255;
+    --navy-light: 0.30 0.07 255;
+    --gold: 0.72 0.14 75;
+    --gold-light: 0.82 0.12 80;
+    --warm-white: 0.98 0.005 90;
+    --success: 0.65 0.15 145;
+    --warning: 0.75 0.15 60;
+  }
+
+  .dark {
+    /* Deep Charcoal Background */
+    --background: 0.14 0.03 255;
+    --foreground: 0.95 0.01 90;
+
+    /* Card */
+    --card: 0.19 0.04 255;
+    --card-foreground: 0.95 0.01 90;
+
+    /* Popover */
+    --popover: 0.22 0.05 255;
+    --popover-foreground: 0.95 0.01 90;
+
+    /* Primary */
+    --primary: 0.72 0.14 75;
+    --primary-foreground: 0.15 0.04 255;
+
+    /* Secondary */
+    --secondary: 0.25 0.05 255;
+    --secondary-foreground: 0.95 0.01 90;
+
+    /* Muted */
+    --muted: 0.25 0.04 255;
+    --muted-foreground: 0.65 0.03 255;
+
+    /* Accent */
+    --accent: 0.72 0.14 75;
+    --accent-foreground: 0.15 0.04 255;
+
+    /* Destructive */
+    --destructive: 0.704 0.191 22.216;
+    --destructive-foreground: 0.98 0 0;
+
+    /* Border / Input / Ring */
+    --border: 0.30 0.05 255;
+    --input: 0.30 0.05 255;
+    --ring: 0.72 0.14 75;
+
+    /* Charts */
+    --chart-1: 0.488 0.243 264.376;
+    --chart-2: 0.696 0.17 162.48;
+    --chart-3: 0.769 0.188 70.08;
+    --chart-4: 0.627 0.265 303.9;
+    --chart-5: 0.645 0.246 16.439;
+
+    /* Sidebar */
+    --sidebar: 0.17 0.04 255;
+    --sidebar-foreground: 0.95 0.01 90;
+    --sidebar-primary: 0.72 0.14 75;
+    --sidebar-primary-foreground: 0.15 0.04 255;
+    --sidebar-accent: 0.22 0.05 255;
+    --sidebar-accent-foreground: 0.95 0.01 90;
+    --sidebar-border: 0.28 0.05 255;
+    --sidebar-ring: 0.72 0.14 75;
+
+    /* Custom tokens */
+    --navy: 0.22 0.07 255;
+    --navy-light: 0.30 0.07 255;
+    --gold: 0.72 0.14 75;
+    --gold-light: 0.82 0.12 80;
+    --warm-white: 0.98 0.005 90;
+    --success: 0.65 0.15 145;
+    --warning: 0.75 0.15 60;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .btn-gold {
+    @apply bg-gold text-navy font-semibold px-6 py-2.5 rounded-md hover:bg-gold-light transition-all duration-200 shadow-sm hover:shadow-md;
+  }
+
+  .btn-navy {
+    @apply bg-navy text-warm-white font-semibold px-6 py-2.5 rounded-md hover:bg-navy-light transition-all duration-200 shadow-sm hover:shadow-md;
+  }
+
+  .card-premium {
+    @apply bg-card rounded-lg shadow-md border border-border transition-all duration-300 hover:shadow-lg;
+  }
+
+  .stat-card {
+    @apply bg-card rounded-xl p-6 shadow-md border border-border transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
+  }
+}

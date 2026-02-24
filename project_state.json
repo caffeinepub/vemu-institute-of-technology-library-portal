@@ -1,0 +1,163 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 9,
+  "summary": "Full-stack VEMU Institute of Technology Library Portal web app with landing page (animated stats, hero section), user authentication (signup/login), admin dashboard for managing books and users, dark mode, mobile-responsive navigation, and role-based access.",
+  "architectural_notes": [
+    "Full-stack web application for VEMU Institute of Technology Library Portal",
+    "Premium UI with dark mode and mobile-responsive design"
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-build-a-public-landing-page-with-1-a-full-width-hero-section-featuring-the-vemu-institute-of-technology-library-portal-name-a-tagline-and-cta-buttons-for-login-and-sign-up-2-an-animated-stats-bar-showing-live-fetched-numbers-total-books-registered-users-books-borrowed-3-a-features-highlights-section-describing-library-services-4-a-footer-with-institute-branding",
+      "title": "Build a public landing page with: (1) a full-width hero section featuring the VEMU Institute of Technology Library Portal name, a tagline, and CTA buttons for Login and Sign Up; (2) an animated stats bar showing live-fetched numbers (total books, registered users, books borrowed); (3) a features/highlights section describing library services; (4) a footer with institute branding.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-user-authentication-flows-1-sign-up-page-collect-name-email-password-confirm-password-on-submit-call-backend-register-function-and-redirect-to-student-dashboard-2-login-page-collect-email-and-password-on-submit-authenticate-against-backend-and-redirect-based-on-role-student-dashboard-or-admin-dashboard-3-logout-clears-session-state-and-redirects-to-landing-page-store-authenticated-user-state-in-react-context-react-query",
+      "title": "Implement user authentication flows: (1) Sign Up page — collect name, email, password, confirm password; on submit, call backend register function and redirect to student dashboard; (2) Login page — collect email and password; on submit, authenticate against backend and redirect based on role (student dashboard or admin dashboard); (3) Logout clears session state and redirects to landing page. Store authenticated user state in React context/React Query.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-student-dashboard-protected-role-student-with-1-a-searchable-filterable-book-catalog-listing-all-available-books-with-title-author-category-and-available-copies-2-a-borrow-button-on-each-book-that-calls-the-backend-borrow-function-disabled-if-no-copies-available-3-a-my-borrowed-books-section-showing-active-borrows-with-due-dates-and-a-return-button-4-borrow-history-tab-showing-past-records",
+      "title": "Build a Student Dashboard (protected, role: student) with: (1) a searchable, filterable book catalog listing all available books with title, author, category, and available copies; (2) a Borrow button on each book that calls the backend borrow function (disabled if no copies available); (3) a 'My Borrowed Books' section showing active borrows with due dates and a Return button; (4) borrow history tab showing past records.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-an-admin-dashboard-protected-role-admin-with-1-sidebar-navigation-with-sections-overview-manage-books-manage-users-borrow-records-2-overview-tab-showing-animated-stat-cards-total-books-total-users-books-borrowed-overdue-3-manage-books-tab-with-a-table-of-all-books-add-book-form-modal-edit-book-and-delete-book-4-manage-users-tab-with-a-table-of-all-users-role-badge-and-ability-to-delete-users-5-borrow-records-tab-showing-all-borrow-history-with-filters",
+      "title": "Build an Admin Dashboard (protected, role: admin) with: (1) sidebar navigation with sections: Overview, Manage Books, Manage Users, Borrow Records; (2) Overview tab showing animated stat cards (total books, total users, books borrowed, overdue); (3) Manage Books tab with a table of all books, Add Book form/modal, Edit Book, and Delete Book; (4) Manage Users tab with a table of all users, role badge, and ability to delete users; (5) Borrow Records tab showing all borrow history with filters.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-dark-mode-support-provide-a-toggle-in-the-navigation-bar-that-switches-between-light-and-dark-themes-persist-the-user-s-preference-in-localstorage-and-apply-it-on-page-load",
+      "title": "Implement dark mode support: provide a toggle in the navigation bar that switches between light and dark themes. Persist the user's preference in localStorage and apply it on page load.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-fully-mobile-responsive-navigation-bar-with-a-logo-institute-name-on-the-left-nav-links-in-the-center-for-desktop-and-a-hamburger-menu-on-mobile-that-opens-a-slide-in-drawer-with-all-navigation-links-and-the-dark-mode-toggle",
+      "title": "Implement a fully mobile-responsive navigation bar with: a logo/institute name on the left, nav links in the center for desktop, and a hamburger menu on mobile that opens a slide-in drawer with all navigation links and the dark mode toggle.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-premium-academic-visual-theme-throughout-the-app-use-deep-navy-and-gold-as-primary-brand-colors-with-warm-off-white-backgrounds-in-light-mode-and-deep-charcoal-surfaces-in-dark-mode-use-a-clean-serif-or-professional-sans-serif-font-for-headings-and-a-readable-sans-serif-for-body-text-use-card-based-layouts-with-subtle-shadows-smooth-transitions-and-consistent-spacing-the-aesthetic-should-evoke-an-academic-institution-s-prestige-and-trustworthiness",
+      "title": "Apply a premium academic visual theme throughout the app: use deep navy and gold as primary brand colors with warm off-white backgrounds in light mode and deep charcoal surfaces in dark mode. Use a clean serif or professional sans-serif font for headings and a readable sans-serif for body text. Use card-based layouts with subtle shadows, smooth transitions, and consistent spacing. The aesthetic should evoke an academic institution's prestige and trustworthiness.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-and-render-a-custom-hero-background-image-and-a-library-logo-icon-as-static-assets-in-frontend-public-assets-generated-and-use-them-in-the-landing-page-hero-section-and-navigation-bar-respectively",
+      "title": "Generate and render a custom hero background image and a library logo icon as static assets in frontend/public/assets/generated, and use them in the landing page hero section and navigation bar respectively.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-landing-page-hero-section-frontend-src-pages-landingpage-tsx-render-vemu-institute-of-technology-as-a-large-bold-prominently-styled-heading-that-visually-dominates-the-foreground-it-must-be-the-largest-text-element-in-the-hero-use-the-gold-brand-color-or-a-high-contrast-highlight-treatment-e-g-gold-text-gold-underline-or-a-glowing-outlined-style-and-sit-at-the-very-front-of-the-hero-layering-highest-z-index-among-hero-content-the-text-size-should-be-significantly-larger-than-the-existing-tagline-and-subtitle-text",
+      "title": "In the landing page hero section (frontend/src/pages/LandingPage.tsx), render 'VEMU INSTITUTE OF TECHNOLOGY' as a large, bold, prominently styled heading that visually dominates the foreground. It must be the largest text element in the hero, use the gold brand color or a high-contrast highlight treatment (e.g., gold text, gold underline, or a glowing/outlined style), and sit at the very front of the hero layering (highest z-index among hero content). The text size should be significantly larger than the existing tagline and subtitle text.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-login-page-frontend-src-pages-loginpage-tsx-to-match-the-layout-shown-in-the-uploaded-reference-images-the-page-must-display-a-full-page-library-bookshelf-background-a-dark-semi-transparent-card-with-a-gold-top-border-accent-heading-secure-access-and-subtitle-library-maintenance-system-login-the-card-must-contain-four-fields-in-order-1-select-system-role-a-dropdown-with-placeholder-identify-your-role-and-options-administrator-librarian-faculty-member-student-representative-2-username-unique-id-text-input-with-placeholder-enter-library-id-3-password-password-input-4-batch-year-text-input-e-g-2023-2024-below-the-fields-include-a-remember-me-checkbox-and-forgot-password-link-on-the-same-row-the-primary-action-button-must-be-labeled-authorize-login-below-the-button-add-a-return-to-main-website-link-that-navigates-back-to-the-landing-page-all-interactive-elements-the-button-dropdown-inputs-checkbox-must-use-a-yellow-background-ffd700-or-equivalent-gold-yellow-with-black-text-labels-above-each-field-must-be-uppercase-bold-and-in-yellow-the-card-border-top-accent-must-also-be-yellow-gold",
+      "title": "Redesign the Login page (frontend/src/pages/LoginPage.tsx) to match the layout shown in the uploaded reference images. The page must display a full-page library bookshelf background, a dark semi-transparent card with a gold top border accent, heading 'Secure Access' and subtitle 'Library Maintenance System Login'. The card must contain four fields in order: (1) SELECT SYSTEM ROLE — a dropdown with placeholder 'Identify your role' and options: Administrator, Librarian, Faculty Member, Student Representative; (2) USERNAME / UNIQUE ID — text input with placeholder 'Enter library ID'; (3) PASSWORD — password input; (4) BATCH / YEAR — text input (e.g., '2023–2024'). Below the fields include a 'Remember me' checkbox and 'Forgot Password?' link on the same row. The primary action button must be labeled 'AUTHORIZE LOGIN'. Below the button add a '← Return to Main Website' link that navigates back to the landing page. All interactive elements (the button, dropdown, inputs, checkbox) must use a yellow background (#FFD700 or equivalent gold-yellow) with black text. Labels above each field must be uppercase, bold, and in yellow. The card border-top accent must also be yellow/gold.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-login-page-frontend-src-pages-loginpage-tsx-ensure-the-select-system-role-dropdown-s-option-elements-are-styled-with-a-yellow-ffd700-background-and-black-text-so-that-the-options-list-visually-matches-the-yellow-gold-theme-already-applied-to-other-interactive-form-elements-on-the-page",
+      "title": "In the Login page (frontend/src/pages/LoginPage.tsx), ensure the SELECT SYSTEM ROLE dropdown's option elements are styled with a yellow (#FFD700) background and black text, so that the options list visually matches the yellow/gold theme already applied to other interactive form elements on the page.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Landing page with hero section and animated stats",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "User authentication with signup and login",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Admin dashboard for managing books and users",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Dark mode support",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Mobile-responsive navigation",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Role-based access control",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Create a backend actor with data models and logic for: (1) Books — fields: id, title, author, category, isbn, totalCopies, availableCopies, description, addedAt; (2) Users — fields: id, name, email, passwordHash, role (student | admin), joinedAt; (3) BorrowRecords — fields: id, userId, bookId, borrowedAt, dueDate, returnedAt (optional). Expose CRUD operations for books and users (admin only), borrow/return book functions, and query functions to list books, users, borrow history, and dashboard stats (total books, total users, books borrowed, overdue count).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Highlight 'VEMU INSTITUTE OF TECHNOLOGY' name in large prominent text appearing in the foreground/front of the hero section",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Redesign login form to have: SELECT ROLE (with options: Administrator, Librarian, Faculty Member, Student Representative), USERNAME/UNIQUE ID, PASSWORD, and BATCH/YEAR fields; login button and form elements styled in yellow with black text",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "VEMU Institute of Technology Library Portal",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

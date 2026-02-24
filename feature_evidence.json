@@ -1,0 +1,24 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-in-the-login-page-frontend-src-pages-loginpage-tsx-ensure-the-select-system-role-dropdown-s-option-elements-are-styled-with-a-yellow-ffd700-background-and-black-text-so-that-the-options-list-visually-matches-the-yellow-gold-theme-already-applied-to-other-interactive-form-elements-on-the-page",
+      "featureTitle": "In the Login page (frontend/src/pages/LoginPage.tsx), ensure the SELECT SYSTEM ROLE dropdown's option elements are styled with a yellow (#FFD700) background and black text, so that the options list visually matches the yellow/gold theme already applied to other interactive form elements on the page.",
+      "files": [
+        "frontend/src/pages/LoginPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-12"
+      ],
+      "confidence": "high"
+    }
+  ]
+}
