@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { BookOpen, Users, BookMarked, Clock, Search, Shield, Star, ArrowRight, GraduationCap, Library, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -49,6 +49,31 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { identity } = useInternetIdentity();
   const isAuthenticated = !!identity;
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoError, setVideoError] = useState(false);
+
+  // Explicitly trigger play on mount to handle browser autoplay policies
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const tryPlay = () => {
+      video.play().catch(() => {
+        // Autoplay was blocked — fallback to poster/background image is already in place
+        setVideoError(true);
+      });
+    };
+
+    // Attempt to play immediately
+    tryPlay();
+
+    // Also listen for canplay in case the video isn't ready yet
+    video.addEventListener('canplay', tryPlay, { once: true });
+
+    return () => {
+      video.removeEventListener('canplay', tryPlay);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -61,8 +86,24 @@ export default function LandingPage() {
           backgroundPosition: 'center',
         }}
       >
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-navy/80 dark:bg-navy/90" />
+        {/* Background Video */}
+        <video
+          ref={videoRef}
+          className={`absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-700 ${videoError ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/assets/generated/hero-bg.dim_1440x600.png"
+          onError={() => setVideoError(true)}
+          aria-hidden="true"
+        >
+          <source src="/assets/generated/library-hero-bg.mp4" type="video/mp4" />
+        </video>
+
+        {/* Dark overlay — sits above video, below content */}
+        <div className="absolute inset-0 bg-navy/80 dark:bg-navy/90 z-10" />
 
         {/* Decorative gold top border */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold to-transparent z-20" />

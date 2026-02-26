@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
+  "projectStateVersion": 13,
   "summary": "Full-stack VEMU Institute of Technology Library Portal web app with landing page (animated stats, hero section), user authentication (signup/login), admin dashboard for managing books and users, dark mode, mobile-responsive navigation, and role-based access.",
   "architectural_notes": [
     "Full-stack web application for VEMU Institute of Technology Library Portal",
@@ -96,6 +96,22 @@
         "REQ-12"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-in-the-landing-page-hero-section-frontend-src-pages-landingpage-tsx-add-an-autoplaying-muted-looping-background-video-of-a-library-scene-the-video-element-must-be-absolutely-positioned-to-fill-the-entire-hero-section-w-full-h-full-object-cover-placed-behind-all-hero-content-via-z-index-layering-a-semi-transparent-dark-overlay-must-sit-between-the-video-and-the-hero-text-content-to-preserve-text-readability-the-video-source-should-reference-a-static-asset-at-frontend-public-assets-generated-library-hero-bg-mp4-the-existing-hero-text-cta-buttons-and-other-content-must-remain-fully-visible-and-functional-above-the-video-on-browsers-where-video-cannot-play-the-existing-hero-background-image-should-serve-as-a-fallback",
+      "title": "In the landing page hero section (frontend/src/pages/LandingPage.tsx), add an autoplaying, muted, looping background video of a library scene. The video element must be absolutely positioned to fill the entire hero section (w-full h-full object-cover), placed behind all hero content via z-index layering. A semi-transparent dark overlay must sit between the video and the hero text content to preserve text readability. The video source should reference a static asset at frontend/public/assets/generated/library-hero-bg.mp4. The existing hero text, CTA buttons, and other content must remain fully visible and functional above the video. On browsers where video cannot play, the existing hero background image should serve as a fallback.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-pages-landingpage-tsx-ensure-the-hero-section-contains-an-autoplaying-muted-looping-video-element-that-plays-a-library-scene-video-the-video-element-must-be-absolutely-positioned-to-fill-the-entire-hero-section-w-full-h-full-object-cover-placed-behind-all-hero-content-via-z-index-layering-a-semi-transparent-dark-overlay-must-sit-between-the-video-and-the-hero-text-content-to-preserve-text-readability-the-video-source-must-reference-frontend-public-assets-generated-library-hero-bg-mp4-set-autoplay-muted-loop-and-playsinline-attributes-on-the-video-element-if-the-video-cannot-play-the-existing-hero-background-image-must-serve-as-a-fallback-via-the-video-poster-attribute-all-existing-hero-text-cta-buttons-and-other-content-must-remain-fully-visible-and-functional-above-the-video",
+      "title": "In frontend/src/pages/LandingPage.tsx, ensure the hero section contains an autoplaying, muted, looping <video> element that plays a library scene video. The video element must be absolutely positioned to fill the entire hero section (w-full h-full object-cover), placed behind all hero content via z-index layering. A semi-transparent dark overlay must sit between the video and the hero text content to preserve text readability. The video source must reference frontend/public/assets/generated/library-hero-bg.mp4. Set autoPlay, muted, loop, and playsInline attributes on the video element. If the video cannot play, the existing hero background image must serve as a fallback via the <video> poster attribute. All existing hero text, CTA buttons, and other content must remain fully visible and functional above the video.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -152,6 +168,12 @@
     {
       "id": "AR-9",
       "summary": "Redesign login form to have: SELECT ROLE (with options: Administrator, Librarian, Faculty Member, Student Representative), USERNAME/UNIQUE ID, PASSWORD, and BATCH/YEAR fields; login button and form elements styled in yellow with black text",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Add background video of a library playing on the landing/starting page hero section",
       "reqIds": [],
       "status": "pending"
     }

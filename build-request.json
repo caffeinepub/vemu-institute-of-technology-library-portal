@@ -1,36 +1,41 @@
 {
   "kind": "build_request",
-  "title": "Style login role dropdown/select options with yellow background",
+  "title": "Ensure autoplay library background video on landing page",
   "projectName": "VEMU Library Portal",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-12",
-      "text": "In the Login page (frontend/src/pages/LoginPage.tsx), ensure the SELECT SYSTEM ROLE dropdown's option elements are styled with a yellow (#FFD700) background and black text, so that the options list visually matches the yellow/gold theme already applied to other interactive form elements on the page.",
+      "id": "REQ-14",
+      "text": "In frontend/src/pages/LandingPage.tsx, ensure the hero section contains an autoplaying, muted, looping <video> element that plays a library scene video. The video element must be absolutely positioned to fill the entire hero section (w-full h-full object-cover), placed behind all hero content via z-index layering. A semi-transparent dark overlay must sit between the video and the hero text content to preserve text readability. The video source must reference frontend/public/assets/generated/library-hero-bg.mp4. Set autoPlay, muted, loop, and playsInline attributes on the video element. If the video cannot play, the existing hero background image must serve as a fallback via the <video> poster attribute. All existing hero text, CTA buttons, and other content must remain fully visible and functional above the video.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "change login option in yellow colour"
+          "i need when i open website it will playbck videou of library"
         ]
       },
       "acceptanceCriteria": [
-        "The SELECT SYSTEM ROLE dropdown's visible option items (Administrator, Librarian, Faculty Member, Student Representative, and the placeholder 'Identify your role') display with a #FFD700 yellow background and black text when the dropdown is open.",
-        "The closed/selected state of the dropdown also shows yellow background with black text, consistent with other form inputs on the Login page.",
-        "No other styling on the Login page is altered by this change."
+        "Opening the landing page immediately begins playing a library video in the hero section background without requiring user interaction.",
+        "The video plays automatically, is muted, loops continuously, and fills the full hero section with object-cover sizing.",
+        "The video is layered behind all hero text and CTA buttons, which remain readable and clickable.",
+        "A semi-transparent dark overlay is visible between the video and the hero content.",
+        "The video source path is frontend/public/assets/generated/library-hero-bg.mp4.",
+        "On browsers where autoplay is blocked or the video fails to load, the hero background image is shown as a fallback."
       ]
     }
   ],
   "constraints": [
     "Do not modify any files listed in frontend.immutablePaths.",
-    "Only change the Login page role dropdown option styling; do not alter any other page or component."
+    "All changes must be confined to frontend/src/pages/LandingPage.tsx and the static asset at frontend/public/assets/generated/library-hero-bg.mp4.",
+    "The video must not have audio that plays automatically; the muted attribute is required."
   ],
   "nonGoals": [
-    "Changing the layout or structure of the Login page.",
-    "Modifying any backend logic.",
-    "Restyling any page other than LoginPage.tsx."
+    "Adding video playback to any page other than the landing page hero section.",
+    "Implementing a video upload or management feature in the admin dashboard.",
+    "Changing any backend logic or data models.",
+    "Modifying the login, signup, student dashboard, or admin dashboard pages."
   ],
   "imageRequirements": {
     "required": [],

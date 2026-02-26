@@ -1,21 +1,24 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Style login role dropdown/select options with yellow background",
+  "title": "Ensure autoplay library background video on landing page",
   "requirements": [
     {
-      "id": "REQ-12",
-      "summary": "Style the SELECT SYSTEM ROLE dropdown options with yellow (#FFD700) background and black text to match the yellow/gold theme of other form elements on the Login page",
+      "id": "REQ-14",
+      "summary": "Add autoplaying background video to landing page hero section with proper layering and fallback",
       "acceptanceCriteria": [
-        "The SELECT SYSTEM ROLE dropdown's visible option items (Administrator, Librarian, Faculty Member, Student Representative, and the placeholder 'Identify your role') display with a #FFD700 yellow background and black text when the dropdown is open.",
-        "The closed/selected state of the dropdown also shows yellow background with black text, consistent with other form inputs on the Login page.",
-        "No other styling on the Login page is altered by this change."
+        "Opening the landing page immediately begins playing a library video in the hero section background without requiring user interaction.",
+        "The video plays automatically, is muted, loops continuously, and fills the full hero section with object-cover sizing.",
+        "The video is layered behind all hero text and CTA buttons, which remain readable and clickable.",
+        "A semi-transparent dark overlay is visible between the video and the hero content.",
+        "The video source path is frontend/public/assets/generated/library-hero-bg.mp4.",
+        "On browsers where autoplay is blocked or the video fails to load, the hero background image is shown as a fallback."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/LoginPage.tsx",
+          "path": "frontend/src/pages/LandingPage.tsx",
           "operation": "modify",
-          "description": "Update the SELECT SYSTEM ROLE dropdown styling to apply yellow (#FFD700) background and black text to all option elements and the select element itself. Add inline styles or Tailwind classes to ensure both the closed/selected state and the open options list display with the yellow background. Ensure the styling matches the existing yellow/gold theme already present on other form inputs without altering any other page elements or layout."
+          "description": "Modify the hero section to include an autoplaying background video element. Add a <video> element with autoPlay, muted, loop, and playsInline attributes, sourcing frontend/public/assets/generated/library-hero-bg.mp4. Position the video absolutely to fill the hero section (w-full h-full object-cover) and layer it behind all hero content using z-index. Add a semi-transparent dark overlay div between the video and the hero text content to ensure readability. Set the poster attribute on the video to reference the existing hero background image as a fallback. Ensure all existing hero text, CTA buttons, and navigation remain fully visible and functional above the video layer."
         }
       ]
     }

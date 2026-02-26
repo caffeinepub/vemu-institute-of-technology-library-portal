@@ -1,14 +1,14 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T20:53:26.949Z",
-  "summary": "The diff modifies frontend/src/pages/LoginPage.tsx to implement a custom dropdown for the SELECT SYSTEM ROLE field. Based on the file summary, the open options list uses a yellow (#FFD700) background with black text (darker shade on hover/selected), which aligns with REQ-12. The closed/selected state uses the same inputStyle with yellow background and black text. The change appears scoped to the role dropdown only.",
+  "generatedAt": "2026-02-26T00:05:10.601Z",
+  "summary": "The diff implements REQ-14 in frontend/src/pages/LandingPage.tsx. The video element is added with autoPlay, muted, loop, playsInline attributes, absolutely positioned with w-full h-full object-cover, a dark overlay between video and content, the correct source path /assets/generated/library-hero-bg.mp4, a poster fallback, and a useEffect to handle autoplay policies. All existing hero content is preserved above the video layer. The static asset file (library-hero-bg.mp4) is not explicitly shown as added in the diff, but the diff summary notes only LLM-readable files; binary files would not appear. All major requirements of REQ-14 appear satisfied.",
   "missing_requirements": [],
   "hallucinated_features": [],
-  "confidence": 0.82,
+  "confidence": 0.9,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/pages/LoginPage.tsx",
+    "frontend/src/pages/LandingPage.tsx",
     "project_state.json"
   ]
 }
