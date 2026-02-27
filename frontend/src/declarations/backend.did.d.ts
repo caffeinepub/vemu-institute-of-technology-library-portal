@@ -10,6 +10,23 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface Announcement {
+  'id' : string,
+  'title' : string,
+  'publishDate' : Time,
+  'body' : string,
+  'createdAt' : Time,
+  'updatedAt' : Time,
+  'priority' : AnnouncementPriority,
+}
+export interface AnnouncementCreateData {
+  'title' : string,
+  'publishDate' : Time,
+  'body' : string,
+  'priority' : AnnouncementPriority,
+}
+export type AnnouncementPriority = { 'normal' : null } |
+  { 'urgent' : null };
 export interface Book {
   'id' : string,
   'title' : string,
@@ -36,6 +53,33 @@ export interface BorrowRecord {
   'bookId' : string,
   'returnedAt' : [] | [Time],
 }
+export interface DigitalResource {
+  'id' : string,
+  'url' : string,
+  'title' : string,
+  'description' : string,
+  'addedAt' : Time,
+  'category' : string,
+}
+export interface DigitalResourceCreateData {
+  'url' : string,
+  'title' : string,
+  'description' : string,
+  'category' : string,
+}
+export interface Reservation {
+  'id' : string,
+  'status' : ReservationStatus,
+  'userId' : Principal,
+  'createdAt' : Time,
+  'dueDate' : [] | [Time],
+  'bookId' : string,
+  'updatedAt' : Time,
+}
+export type ReservationStatus = { 'cancelled' : null } |
+  { 'pending' : null } |
+  { 'approved' : null } |
+  { 'rejected' : null };
 export type Time = bigint;
 export interface UserProfile {
   'name' : string,
@@ -48,18 +92,33 @@ export type UserRole = { 'admin' : null } |
   { 'guest' : null };
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addAnnouncement' : ActorMethod<[AnnouncementCreateData], string>,
   'addBook' : ActorMethod<[BookCreateData], undefined>,
+  'addDigitalResource' : ActorMethod<[DigitalResourceCreateData], string>,
+  'approveReservation' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'borrowBook' : ActorMethod<[string], undefined>,
+  'cancelReservation' : ActorMethod<[string], undefined>,
+  'createReservation' : ActorMethod<[string], string>,
   'decrementActiveUsers' : ActorMethod<[], undefined>,
+  'deleteAnnouncement' : ActorMethod<[string], undefined>,
   'deleteBook' : ActorMethod<[string], undefined>,
+  'deleteDigitalResource' : ActorMethod<[string], undefined>,
+  'editAnnouncement' : ActorMethod<[string, AnnouncementCreateData], undefined>,
   'editBook' : ActorMethod<[string, BookCreateData], undefined>,
+  'editDigitalResource' : ActorMethod<
+    [string, DigitalResourceCreateData],
+    undefined
+  >,
   'getActiveUserCount' : ActorMethod<[], bigint>,
+  'getAllAnnouncements' : ActorMethod<[], Array<Announcement>>,
   'getAllBooksSortedByTitle' : ActorMethod<[], Array<Book>>,
   'getAllBorrowRecords' : ActorMethod<
     [],
     Array<[Principal, Array<BorrowRecord>]>
   >,
+  'getAllDigitalResources' : ActorMethod<[], Array<DigitalResource>>,
+  'getAllReservations' : ActorMethod<[], Array<Reservation>>,
   'getAllUsers' : ActorMethod<[], Array<[Principal, UserProfile]>>,
   'getBookById' : ActorMethod<[string], Book>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
@@ -74,17 +133,13 @@ export interface _SERVICE {
     }
   >,
   'getMyBorrowHistory' : ActorMethod<[], Array<BorrowRecord>>,
+  'getMyReservations' : ActorMethod<[], Array<Reservation>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getUserRole' : ActorMethod<[], UserRole>,
   'incrementActiveUsers' : ActorMethod<[], undefined>,
-  /**
-   * / Bootstrap function: sets the caller as the initial admin.
-   * / This delegates entirely to AccessControl.initialize which handles
-   * / the bootstrapping logic (can only be called once / by the right principal).
-   * / No admin pre-check here — that would create a chicken-and-egg problem.
-   */
   'initialize' : ActorMethod<[string, string], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'rejectReservation' : ActorMethod<[string], undefined>,
   'returnBook' : ActorMethod<[string], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
 }

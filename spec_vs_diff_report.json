@@ -1,21 +1,66 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T00:53:11.201Z",
-  "summary": "The diff shows only a single modification to project_state.json, which appears to be a metadata/state tracking file. There is no evidence of actual frontend source files, backend Motoko code, or configuration files being reverted to Version 8. The requirement calls for reverting the entire application (both frontend and backend) to Version 8 state, but the diff contains no changes to application source files.",
+  "generatedAt": "2026-02-27T07:53:30.205Z",
+  "summary": "The diff implements substantial fixes across frontend components and the backend actor. Most requirements are addressed: BookCatalog, BorrowedBooksList, StudentDashboard, AdminDashboard tabs, useQueries.ts hooks, AuthContext, and backend/main.mo are all modified. However, the diff does not include changes to App.tsx (route registration verification), which is a critical part of REQ-2 and REQ-3. The backend/main.mo is truncated so full audit of all required methods cannot be confirmed for REQ-4.",
   "missing_requirements": [
     {
-      "id": "REQ-28",
-      "requirement": "Revert the entire application (both frontend and backend) to the state it was in at Version 8, discarding all changes introduced in Version 9. Restore all frontend source files, backend Motoko code, and configuration to exactly match Version 8.",
-      "reason": "The diff only modifies project_state.json (a metadata file). No frontend source files (React components, CSS, etc.), backend Motoko files, or configuration files (e.g., dfx.json, package.json, webpack/vite config) were added, modified, or removed to reflect a revert to Version 8. There is no evidence that any Version 9 changes were actually reverted in the application code.",
+      "id": "REQ-2",
+      "requirement": "Verify that the route /dashboard is properly registered in App.tsx and the StudentDashboard page component is mounted.",
+      "reason": "App.tsx does not appear in the diff at all. There is no evidence the /dashboard route registration was verified or fixed in App.tsx.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Verify the /admin route is registered in App.tsx and the AdminDashboard page is protected by the admin role guard.",
+      "reason": "App.tsx does not appear in the diff. There is no evidence the /admin route registration was verified or fixed in App.tsx.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "All backend actor methods required by the frontend are exposed in backend/main.mo, including getAllAnnouncements, getAllDigitalResources, reserveBook, cancelReservation, approveReservation, rejectReservation.",
+      "reason": "backend/main.mo is truncated in the diff. Several methods cannot be confirmed present due to truncation. Additionally useQueries.ts calls getAllBooksSortedByTitle rather than getAllBooks, making the method name mapping unclear.",
       "evidence": [
-        "project_state.json"
+        "backend/main.mo",
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "Fix the actor initialization in useActor.ts so the authenticated actor is properly created and cached before any query hooks attempt to call backend methods.",
+      "reason": "useActor.ts does not appear in the diff at all. The diff partially addresses this by adding enabled guards and null checks in useQueries.ts, but the root actor initialization fix in useActor.ts itself is absent.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.85,
+  "hallucinated_features": [
+    {
+      "description": "useGetActiveUserCount hook used in OverviewTab to display Members Currently Online with a 30-second refresh",
+      "reason": "The build request does not mention an active user count or online members feature. The required hooks listed in REQ-3 are useGetAllBooks, useGetAllUsers, useGetAllBorrowRecords, and useGetStats. useGetActiveUserCount is not among them.",
+      "evidence": [
+        "frontend/src/components/admin/OverviewTab.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    }
+  ],
+  "confidence": 0.72,
   "changed_files": [
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/components/BookCatalog.tsx",
+    "frontend/src/components/BorrowedBooksList.tsx",
+    "frontend/src/components/ProfileSetupModal.tsx",
+    "frontend/src/components/admin/AddBookModal.tsx",
+    "frontend/src/components/admin/BorrowRecordsTab.tsx",
+    "frontend/src/components/admin/ManageBooksTab.tsx",
+    "frontend/src/components/admin/ManageUsersTab.tsx",
+    "frontend/src/components/admin/OverviewTab.tsx",
+    "frontend/src/contexts/AuthContext.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/AdminDashboard.tsx",
+    "frontend/src/pages/DigitalResources.tsx",
+    "frontend/src/pages/StudentDashboard.tsx",
     "project_state.json"
   ]
 }

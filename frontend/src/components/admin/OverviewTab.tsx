@@ -1,106 +1,114 @@
-import React from 'react';
-import { useGetDashboardStats, useGetActiveUserCount } from '../../hooks/useQueries';
-import { useAuth } from '../../contexts/AuthContext';
-import { UserRole } from '../../backend';
-import AnimatedCounter from '../AnimatedCounter';
+import React, { useEffect } from 'react';
 import { BookOpen, Users, BookMarked, AlertTriangle, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import AnimatedCounter from '../AnimatedCounter';
+import { useGetDashboardStats, useGetActiveUserCount } from '../../hooks/useQueries';
 
 export default function OverviewTab() {
-  const { userRole } = useAuth();
-  const { data: stats, isLoading: statsLoading } = useGetDashboardStats();
-  const { data: activeCount, isLoading: activeLoading } = useGetActiveUserCount();
+  const { data: stats, isLoading: statsLoading, error: statsError } = useGetDashboardStats();
+  const { data: activeUsers, isLoading: activeLoading } = useGetActiveUserCount();
 
   const statCards = [
     {
       title: 'Total Books',
       value: stats ? Number(stats.totalBooks) : 0,
       icon: BookOpen,
-      color: 'text-primary',
-      bg: 'bg-primary/10',
+      color: 'text-blue-500',
+      bg: 'bg-blue-500/10',
     },
     {
       title: 'Registered Users',
       value: stats ? Number(stats.totalUsers) : 0,
       icon: Users,
-      color: 'text-blue-600',
-      bg: 'bg-blue-100 dark:bg-blue-900/20',
+      color: 'text-green-500',
+      bg: 'bg-green-500/10',
     },
     {
       title: 'Books Borrowed',
       value: stats ? Number(stats.booksBorrowed) : 0,
       icon: BookMarked,
-      color: 'text-amber-600',
-      bg: 'bg-amber-100 dark:bg-amber-900/20',
+      color: 'text-yellow-500',
+      bg: 'bg-yellow-500/10',
     },
     {
-      title: 'Overdue Books',
+      title: 'Overdue',
       value: stats ? Number(stats.overdueCount) : 0,
       icon: AlertTriangle,
-      color: 'text-destructive',
-      bg: 'bg-destructive/10',
+      color: 'text-red-500',
+      bg: 'bg-red-500/10',
     },
   ];
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="font-heading text-2xl font-bold text-foreground">Dashboard Overview</h2>
-        <p className="text-muted-foreground text-sm mt-1">
-          Real-time statistics for the VEMU Library system.
+  if (statsLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))}
+        </div>
+        <Skeleton className="h-32 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (statsError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <AlertTriangle className="w-12 h-12 text-destructive mb-4" />
+        <p className="text-lg font-semibold">Failed to load dashboard stats</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          {statsError instanceof Error ? statsError.message : 'An unexpected error occurred'}
         </p>
       </div>
+    );
+  }
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {statCards.map(({ title, value, icon: Icon, color, bg }) => (
-          <Card key={title}>
+  return (
+    <div className="space-y-6">
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((card) => (
+          <Card key={card.title}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-              <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center`}>
-                <Icon className={`w-5 h-5 ${color}`} />
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {card.title}
+              </CardTitle>
+              <div className={`w-9 h-9 rounded-lg ${card.bg} flex items-center justify-center`}>
+                <card.icon className={`w-5 h-5 ${card.color}`} />
               </div>
             </CardHeader>
             <CardContent>
-              {statsLoading ? (
-                <Skeleton className="h-8 w-16" />
-              ) : (
-                <AnimatedCounter target={value} className="text-3xl font-bold text-foreground font-heading" />
-              )}
+              <div className="text-3xl font-bold font-heading">
+                <AnimatedCounter target={card.value} />
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Active Members Online — admin only */}
-      {userRole === UserRole.admin && (
-        <Card className="border-primary/30 bg-primary/5">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
-              </span>
-              Members Currently Online
-            </CardTitle>
-            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Activity className="w-5 h-5 text-primary" />
+      {/* Active Users Card */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            Members Currently Online
+          </CardTitle>
+          <div className="w-9 h-9 rounded-lg bg-purple-500/10 flex items-center justify-center">
+            <Activity className="w-5 h-5 text-purple-500" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          {activeLoading ? (
+            <Skeleton className="h-9 w-16" />
+          ) : (
+            <div className="text-3xl font-bold font-heading">
+              <AnimatedCounter target={activeUsers ? Number(activeUsers) : 0} />
             </div>
-          </CardHeader>
-          <CardContent>
-            {activeLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <AnimatedCounter
-                target={activeCount !== undefined ? Number(activeCount) : 0}
-                className="text-3xl font-bold text-primary font-heading"
-              />
-            )}
-            <p className="text-xs text-muted-foreground mt-1">Live count · refreshes every 30s</p>
-          </CardContent>
-        </Card>
-      )}
+          )}
+          <p className="text-xs text-muted-foreground mt-1">Refreshes every 30 seconds</p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

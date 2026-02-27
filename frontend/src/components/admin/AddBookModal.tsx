@@ -1,63 +1,87 @@
-import React, { useState } from 'react';
-import { useAddBook } from '../../hooks/useQueries';
-import { useAuth } from '../../contexts/AuthContext';
-import { UserRole } from '../../backend';
-import type { BookCreateData } from '../../backend';
+import React, { useState, useContext } from 'react';
+import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useAddBook, useEditBook } from '../../hooks/useQueries';
+import { AuthContext } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
+import type { Book } from '../../backend';
 
 interface AddBookModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
+  editBook?: Book | null;
 }
 
-const EMPTY_FORM = {
+interface FormState {
+  title: string;
+  author: string;
+  category: string;
+  isbn: string;
+  totalCopies: string;
+  description: string;
+}
+
+const EMPTY_FORM: FormState = {
   title: '',
   author: '',
   category: '',
   isbn: '',
-  totalCopies: '',
+  totalCopies: '1',
   description: '',
 };
 
-export default function AddBookModal({ open, onOpenChange }: AddBookModalProps) {
-  const { userRole } = useAuth();
-  const addBookMutation = useAddBook();
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [errors, setErrors] = useState<Partial<typeof EMPTY_FORM>>({});
+export default function AddBookModal({ onClose, editBook }: AddBookModalProps) {
+  const { userRole } = useContext(AuthContext);
+  const addMutation = useAddBook();
+  const editMutation = useEditBook();
 
-  // Defense-in-depth: don't render for non-admins
-  if (userRole !== UserRole.admin) return null;
+  const isEditing = !!editBook;
+
+  const [form, setForm] = useState<FormState>(
+    editBook
+      ? {
+          title: editBook.title,
+          author: editBook.author,
+          category: editBook.category,
+          isbn: editBook.isbn,
+          totalCopies: String(editBook.totalCopies),
+          description: editBook.description,
+        }
+      : EMPTY_FORM
+  );
+
+  const [errors, setErrors] = useState<Partial<FormState>>({});
 
   const validate = (): boolean => {
-    const newErrors: Partial<typeof EMPTY_FORM> = {};
+    const newErrors: Partial<FormState> = {};
     if (!form.title.trim()) newErrors.title = 'Title is required';
     if (!form.author.trim()) newErrors.author = 'Author is required';
     if (!form.category.trim()) newErrors.category = 'Category is required';
     if (!form.isbn.trim()) newErrors.isbn = 'ISBN is required';
     const copies = parseInt(form.totalCopies, 10);
     if (isNaN(copies) || copies < 1) newErrors.totalCopies = 'Must be at least 1';
-    if (!form.description.trim()) newErrors.description = 'Description is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (userRole !== 'admin') {
+      toast.error('Only admins can manage books');
+      return;
+    }
     if (!validate()) return;
 
-    const bookData: BookCreateData = {
+    const bookData = {
       title: form.title.trim(),
       author: form.author.trim(),
       category: form.category.trim(),
@@ -67,120 +91,84 @@ export default function AddBookModal({ open, onOpenChange }: AddBookModalProps) 
     };
 
     try {
-      await addBookMutation.mutateAsync(bookData);
-      toast.success(`"${form.title}" added to the library!`);
-      setForm(EMPTY_FORM);
-      setErrors({});
-      onOpenChange(false);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      toast.error(msg.includes('ISBN already exists') ? 'A book with this ISBN already exists.' : 'Failed to add book. Please try again.');
+      if (isEditing && editBook) {
+        await editMutation.mutateAsync({ bookId: editBook.id, bookData });
+        toast.success(`"${form.title}" updated successfully`);
+      } else {
+        await addMutation.mutateAsync(bookData);
+        toast.success(`"${form.title}" added successfully`);
+      }
+      onClose();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Operation failed';
+      toast.error(message);
     }
   };
 
-  const handleChange = (field: keyof typeof EMPTY_FORM) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
-  };
+  const isPending = addMutation.isPending || editMutation.isPending;
+
+  const renderField = (
+    id: keyof FormState,
+    label: string,
+    type: string = 'text',
+    placeholder?: string
+  ) => (
+    <div className="space-y-1">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type={type}
+        placeholder={placeholder}
+        value={form[id]}
+        onChange={(e) => setForm((prev) => ({ ...prev, [id]: e.target.value }))}
+        disabled={isPending}
+        className={errors[id] ? 'border-destructive' : ''}
+      />
+      {errors[id] && <p className="text-xs text-destructive">{errors[id]}</p>}
+    </div>
+  );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add New Book</DialogTitle>
-          <DialogDescription>
-            Fill in the details below to add a new book to the library catalog.
-          </DialogDescription>
+          <DialogTitle>{isEditing ? 'Edit Book' : 'Add New Book'}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="title">Title *</Label>
-              <Input
-                id="title"
-                value={form.title}
-                onChange={handleChange('title')}
-                placeholder="Book title"
-              />
-              {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="author">Author *</Label>
-              <Input
-                id="author"
-                value={form.author}
-                onChange={handleChange('author')}
-                placeholder="Author name"
-              />
-              {errors.author && <p className="text-xs text-destructive">{errors.author}</p>}
-            </div>
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {renderField('title', 'Title', 'text', 'e.g. Introduction to Algorithms')}
+          {renderField('author', 'Author', 'text', 'e.g. Thomas H. Cormen')}
+          {renderField('category', 'Category', 'text', 'e.g. Computer Science')}
+          {renderField('isbn', 'ISBN', 'text', 'e.g. 978-0-262-03384-8')}
+          {renderField('totalCopies', 'Total Copies', 'number', '1')}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="category">Category *</Label>
-              <Input
-                id="category"
-                value={form.category}
-                onChange={handleChange('category')}
-                placeholder="e.g. Computer Science"
-              />
-              {errors.category && <p className="text-xs text-destructive">{errors.category}</p>}
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="isbn">ISBN *</Label>
-              <Input
-                id="isbn"
-                value={form.isbn}
-                onChange={handleChange('isbn')}
-                placeholder="978-0-000-00000-0"
-              />
-              {errors.isbn && <p className="text-xs text-destructive">{errors.isbn}</p>}
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="totalCopies">Total Copies *</Label>
-            <Input
-              id="totalCopies"
-              type="number"
-              min={1}
-              value={form.totalCopies}
-              onChange={handleChange('totalCopies')}
-              placeholder="1"
-            />
-            {errors.totalCopies && <p className="text-xs text-destructive">{errors.totalCopies}</p>}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="description">Description *</Label>
+          <div className="space-y-1">
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
+              placeholder="Brief description of the book..."
               value={form.description}
-              onChange={handleChange('description')}
-              placeholder="Brief description of the book…"
+              onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+              disabled={isPending}
               rows={3}
             />
-            {errors.description && <p className="text-xs text-destructive">{errors.description}</p>}
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={addBookMutation.isPending}
-            >
+            <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
               Cancel
             </Button>
-            <Button type="submit" disabled={addBookMutation.isPending}>
-              {addBookMutation.isPending && (
-                <span className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
+            <Button type="submit" disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {isEditing ? 'Saving…' : 'Adding…'}
+                </>
+              ) : isEditing ? (
+                'Save Changes'
+              ) : (
+                'Add Book'
               )}
-              Add Book
             </Button>
           </DialogFooter>
         </form>

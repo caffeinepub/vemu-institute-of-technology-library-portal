@@ -1,4 +1,92 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-fix-the-book-catalog-on-the-student-dashboard-so-that-books-stored-in-the-backend-are-fetched-and-displayed-correctly-the-page-currently-shows-showing-0-of-0-books-and-no-books-found-even-when-books-exist-in-the-canister-ensure-the-getallbooks-backend-call-is-wired-properly-through-the-react-query-hook-in-usequeries-ts-and-that-the-bookcatalog-component-receives-and-renders-the-data",
+      "featureTitle": "Fix the Book Catalog on the Student Dashboard so that books stored in the backend are fetched and displayed correctly. The page currently shows 'Showing 0 of 0 books' and 'No books found' even when books exist in the canister. Ensure the `getAllBooks` backend call is wired properly through the React Query hook in `useQueries.ts` and that the `BookCatalog` component receives and renders the data.",
+      "files": [
+        "frontend/src/components/BookCatalog.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-the-student-dashboard-tabs-so-that-both-the-browse-books-tab-bookcatalog-and-the-my-borrowed-books-tab-borrowedbookslist-render-content-correctly-verify-that-the-route-dashboard-is-properly-registered-in-app-tsx-the-studentdashboard-page-component-is-mounted-and-all-required-react-query-hooks-usegetallbooks-usegetborrowedbooks-resolve-without-errors",
+      "featureTitle": "Fix the Student Dashboard tabs so that both the 'Browse Books' tab (BookCatalog) and the 'My Borrowed Books' tab (BorrowedBooksList) render content correctly. Verify that the route `/dashboard` is properly registered in `App.tsx`, the `StudentDashboard` page component is mounted, and all required React Query hooks (`useGetAllBooks`, `useGetBorrowedBooks`) resolve without errors.",
+      "files": [
+        "frontend/src/components/BorrowedBooksList.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/StudentDashboard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-the-admin-dashboard-so-that-all-four-tabs-overview-manage-books-manage-users-borrow-records-load-and-display-data-verify-the-admin-route-is-registered-in-app-tsx-the-admindashboard-page-is-protected-by-the-admin-role-guard-and-all-react-query-hooks-used-by-admin-tab-components-usegetallbooks-usegetallusers-usegetallborrowrecords-usegetstats-are-correctly-wired-to-the-backend-actor-methods",
+      "featureTitle": "Fix the Admin Dashboard so that all four tabs (Overview, Manage Books, Manage Users, Borrow Records) load and display data. Verify the `/admin` route is registered in `App.tsx`, the `AdminDashboard` page is protected by the admin role guard, and all React Query hooks used by admin tab components (`useGetAllBooks`, `useGetAllUsers`, `useGetAllBorrowRecords`, `useGetStats`) are correctly wired to the backend actor methods.",
+      "files": [
+        "frontend/src/components/admin/BorrowRecordsTab.tsx",
+        "frontend/src/components/admin/ManageBooksTab.tsx",
+        "frontend/src/components/admin/ManageUsersTab.tsx",
+        "frontend/src/components/admin/OverviewTab.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/AdminDashboard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-the-actor-initialization-in-useactor-ts-so-the-authenticated-actor-is-properly-created-and-cached-before-any-query-hooks-attempt-to-call-backend-methods-ensure-the-actor-is-passed-correctly-to-all-query-and-mutation-hooks-in-usequeries-ts-so-no-hook-silently-skips-fetching-due-to-a-null-or-undefined-actor-reference",
+      "featureTitle": "Fix the actor initialization in `useActor.ts` so the authenticated actor is properly created and cached before any query hooks attempt to call backend methods. Ensure the actor is passed correctly to all query and mutation hooks in `useQueries.ts` so no hook silently skips fetching due to a null or undefined actor reference.",
+      "files": [
+        "frontend/src/components/BookCatalog.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/AdminDashboard.tsx",
+        "frontend/src/pages/StudentDashboard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

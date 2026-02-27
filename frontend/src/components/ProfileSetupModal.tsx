@@ -13,10 +13,10 @@ import { useSaveCallerUserProfile } from '../hooks/useQueries';
 import { BookOpen, Loader2 } from 'lucide-react';
 
 interface ProfileSetupModalProps {
-  open: boolean;
+  open?: boolean;
 }
 
-export default function ProfileSetupModal({ open }: ProfileSetupModalProps) {
+export default function ProfileSetupModal({ open = true }: ProfileSetupModalProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<{ name?: string; email?: string }>({});

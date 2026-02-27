@@ -6,6 +6,8 @@ import Text "mo:core/Text";
 import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import Principal "mo:core/Principal";
+import Nat "mo:core/Nat";
+
 
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
@@ -40,6 +42,61 @@ actor {
     returnedAt : ?Time.Time;
   };
 
+  public type ReservationStatus = {
+    #pending;
+    #approved;
+    #rejected;
+    #cancelled;
+  };
+
+  public type Reservation = {
+    id : Text;
+    bookId : Text;
+    userId : Principal;
+    status : ReservationStatus;
+    createdAt : Time.Time;
+    updatedAt : Time.Time;
+    dueDate : ?Time.Time;
+  };
+
+  public type DigitalResource = {
+    id : Text;
+    title : Text;
+    description : Text;
+    category : Text;
+    url : Text;
+    addedAt : Time.Time;
+  };
+
+  public type DigitalResourceCreateData = {
+    title : Text;
+    description : Text;
+    category : Text;
+    url : Text;
+  };
+
+  public type AnnouncementPriority = {
+    #normal;
+    #urgent;
+  };
+
+  public type Announcement = {
+    id : Text;
+    title : Text;
+    body : Text;
+    priority : AnnouncementPriority;
+    publishDate : Time.Time;
+    createdAt : Time.Time;
+    updatedAt : Time.Time;
+  };
+
+  public type AnnouncementCreateData = {
+    title : Text;
+    body : Text;
+    priority : AnnouncementPriority;
+    publishDate : Time.Time;
+  };
+
   public type UserProfile = {
     name : Text;
     email : Text;
@@ -51,19 +108,27 @@ actor {
     Text.compare(book1.title, book2.title);
   };
 
+  func compareAnnouncementsByDate(a1 : Announcement, a2 : Announcement) : Order.Order {
+    if (a1.publishDate > a2.publishDate) { #less }
+    else if (a1.publishDate < a2.publishDate) { #greater }
+    else { #equal };
+  };
+
   let bookRecords = Map.empty<Principal, Map.Map<Text, BorrowRecord>>();
   let books = Map.empty<Text, Book>();
   let userProfiles = Map.empty<Principal, UserProfile>();
+  let reservations = Map.empty<Text, Reservation>();
+  let digitalResources = Map.empty<Text, DigitalResource>();
+  let announcements = Map.empty<Text, Announcement>();
 
   var activeUsersCount = 0;
+  var reservationCounter = 0;
+  var digitalResourceCounter = 0;
+  var announcementCounter = 0;
 
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  /// Bootstrap function: sets the caller as the initial admin.
-  /// This delegates entirely to AccessControl.initialize which handles
-  /// the bootstrapping logic (can only be called once / by the right principal).
-  /// No admin pre-check here — that would create a chicken-and-egg problem.
   public shared ({ caller }) func initialize(adminToken : Text, userProvidedToken : Text) : async () {
     AccessControl.initialize(accessControlState, caller, adminToken, userProvidedToken);
   };
@@ -93,6 +158,8 @@ actor {
     userProfiles.add(caller, profile);
   };
 
+  // ── Book Catalog ──────────────────────────────────────────────────────────
+
   public query ({ caller }) func getAllBooksSortedByTitle() : async [Book] {
     books.values().toArray().sort(compareBooksByTitle);
   };
@@ -104,18 +171,17 @@ actor {
     };
   };
 
+  // ── Book Management (Admin only) ──────────────────────────────────────────
+
   public shared ({ caller }) func addBook(bookCreateData : BookCreateData) : async () {
-    // Only allow admins to add books
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can add books");
     };
 
-    // Check if ISBN already exists
-    if (books.values().toArray().find(func(book) { book.isbn == bookCreateData.isbn }) != null) {
+    if (books.values().toArray().find(func(book : Book) : Bool { book.isbn == bookCreateData.isbn }) != null) {
       Runtime.trap("Book with given ISBN already exists");
     };
 
-    // Generate unique book ID
     let bookId = bookCreateData.isbn;
     let newBook : Book = {
       id = bookId;
@@ -133,7 +199,6 @@ actor {
   };
 
   public shared ({ caller }) func editBook(bookId : Text, bookCreateData : BookCreateData) : async () {
-    // Only allow admins to edit books
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can edit books");
     };
@@ -158,7 +223,6 @@ actor {
   };
 
   public shared ({ caller }) func deleteBook(bookId : Text) : async () {
-    // Only allow admins to delete books
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can delete books");
     };
@@ -171,8 +235,9 @@ actor {
     };
   };
 
+  // ── Borrowing (Users only) ────────────────────────────────────────────────
+
   public shared ({ caller }) func borrowBook(bookId : Text) : async () {
-    // Only allow users to borrow books
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only registered users can borrow books");
     };
@@ -222,7 +287,6 @@ actor {
   };
 
   public shared ({ caller }) func returnBook(bookId : Text) : async () {
-    // Only allow users to return books
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only registered users can return books");
     };
@@ -243,7 +307,6 @@ actor {
         };
         books.add(bookId, newBook);
 
-        // Mark the borrow record as returned
         switch (bookRecords.get(caller)) {
           case (null) {};
           case (?userBorrowRecords) {
@@ -267,7 +330,6 @@ actor {
   };
 
   public query ({ caller }) func getMyBorrowHistory() : async [BorrowRecord] {
-    // Only allow users to view their borrow history
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only registered users can view borrow history");
     };
@@ -277,8 +339,265 @@ actor {
     };
   };
 
+  // ── Reservations ──────────────────────────────────────────────────────────
+
+  public shared ({ caller }) func createReservation(bookId : Text) : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only registered users can create reservations");
+    };
+
+    switch (books.get(bookId)) {
+      case (null) { Runtime.trap("Book does not exist") };
+      case (?_) {};
+    };
+
+    reservationCounter += 1;
+    let reservationId = "res-" # reservationCounter.toText();
+    let now = Time.now();
+
+    let newReservation : Reservation = {
+      id = reservationId;
+      bookId = bookId;
+      userId = caller;
+      status = #pending;
+      createdAt = now;
+      updatedAt = now;
+      dueDate = null;
+    };
+
+    reservations.add(reservationId, newReservation);
+    reservationId;
+  };
+
+  public shared ({ caller }) func cancelReservation(reservationId : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only registered users can cancel reservations");
+    };
+
+    switch (reservations.get(reservationId)) {
+      case (null) { Runtime.trap("Reservation not found") };
+      case (?reservation) {
+        if (reservation.userId != caller) {
+          Runtime.trap("Unauthorized: You can only cancel your own reservations");
+        };
+        let updated : Reservation = {
+          id = reservation.id;
+          bookId = reservation.bookId;
+          userId = reservation.userId;
+          status = #cancelled;
+          createdAt = reservation.createdAt;
+          updatedAt = Time.now();
+          dueDate = reservation.dueDate;
+        };
+        reservations.add(reservationId, updated);
+      };
+    };
+  };
+
+  public query ({ caller }) func getMyReservations() : async [Reservation] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only registered users can view their reservations");
+    };
+    reservations.values().toArray().filter(func(r : Reservation) : Bool { r.userId == caller });
+  };
+
+  public shared ({ caller }) func approveReservation(reservationId : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can approve reservations");
+    };
+
+    switch (reservations.get(reservationId)) {
+      case (null) { Runtime.trap("Reservation not found") };
+      case (?reservation) {
+        switch (books.get(reservation.bookId)) {
+          case (null) { Runtime.trap("Book does not exist") };
+          case (?book) {
+            if (book.availableCopies == 0) {
+              Runtime.trap("No copies available for this book");
+            };
+            let updatedBook : Book = {
+              id = book.id;
+              title = book.title;
+              author = book.author;
+              category = book.category;
+              isbn = book.isbn;
+              totalCopies = book.totalCopies;
+              availableCopies = book.availableCopies - 1;
+              description = book.description;
+              addedAt = book.addedAt;
+            };
+            books.add(reservation.bookId, updatedBook);
+          };
+        };
+
+        let dueDate = Time.now() + 14 * 24 * 60 * 60 * 1000000000;
+        let updated : Reservation = {
+          id = reservation.id;
+          bookId = reservation.bookId;
+          userId = reservation.userId;
+          status = #approved;
+          createdAt = reservation.createdAt;
+          updatedAt = Time.now();
+          dueDate = ?dueDate;
+        };
+        reservations.add(reservationId, updated);
+      };
+    };
+  };
+
+  public shared ({ caller }) func rejectReservation(reservationId : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can reject reservations");
+    };
+
+    switch (reservations.get(reservationId)) {
+      case (null) { Runtime.trap("Reservation not found") };
+      case (?reservation) {
+        let updated : Reservation = {
+          id = reservation.id;
+          bookId = reservation.bookId;
+          userId = reservation.userId;
+          status = #rejected;
+          createdAt = reservation.createdAt;
+          updatedAt = Time.now();
+          dueDate = reservation.dueDate;
+        };
+        reservations.add(reservationId, updated);
+      };
+    };
+  };
+
+  public query ({ caller }) func getAllReservations() : async [Reservation] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view all reservations");
+    };
+    reservations.values().toArray();
+  };
+
+  // ── Digital Resources ─────────────────────────────────────────────────────
+
+  public query ({ caller }) func getAllDigitalResources() : async [DigitalResource] {
+    digitalResources.values().toArray();
+  };
+
+  public shared ({ caller }) func addDigitalResource(data : DigitalResourceCreateData) : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can add digital resources");
+    };
+
+    digitalResourceCounter += 1;
+    let resourceId = "dr-" # digitalResourceCounter.toText();
+    let newResource : DigitalResource = {
+      id = resourceId;
+      title = data.title;
+      description = data.description;
+      category = data.category;
+      url = data.url;
+      addedAt = Time.now();
+    };
+    digitalResources.add(resourceId, newResource);
+    resourceId;
+  };
+
+  public shared ({ caller }) func editDigitalResource(resourceId : Text, data : DigitalResourceCreateData) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can edit digital resources");
+    };
+
+    switch (digitalResources.get(resourceId)) {
+      case (null) { Runtime.trap("Digital resource not found") };
+      case (?existing) {
+        let updated : DigitalResource = {
+          id = existing.id;
+          title = data.title;
+          description = data.description;
+          category = data.category;
+          url = data.url;
+          addedAt = existing.addedAt;
+        };
+        digitalResources.add(resourceId, updated);
+      };
+    };
+  };
+
+  public shared ({ caller }) func deleteDigitalResource(resourceId : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can delete digital resources");
+    };
+
+    switch (digitalResources.get(resourceId)) {
+      case (null) { Runtime.trap("Digital resource not found") };
+      case (?_) {
+        digitalResources.remove(resourceId);
+      };
+    };
+  };
+
+  // ── Announcements ─────────────────────────────────────────────────────────
+
+  public query ({ caller }) func getAllAnnouncements() : async [Announcement] {
+    announcements.values().toArray().sort(compareAnnouncementsByDate);
+  };
+
+  public shared ({ caller }) func addAnnouncement(data : AnnouncementCreateData) : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can add announcements");
+    };
+
+    announcementCounter += 1;
+    let announcementId = "ann-" # announcementCounter.toText();
+    let now = Time.now();
+    let newAnnouncement : Announcement = {
+      id = announcementId;
+      title = data.title;
+      body = data.body;
+      priority = data.priority;
+      publishDate = data.publishDate;
+      createdAt = now;
+      updatedAt = now;
+    };
+    announcements.add(announcementId, newAnnouncement);
+    announcementId;
+  };
+
+  public shared ({ caller }) func editAnnouncement(announcementId : Text, data : AnnouncementCreateData) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can edit announcements");
+    };
+
+    switch (announcements.get(announcementId)) {
+      case (null) { Runtime.trap("Announcement not found") };
+      case (?existing) {
+        let updated : Announcement = {
+          id = existing.id;
+          title = data.title;
+          body = data.body;
+          priority = data.priority;
+          publishDate = data.publishDate;
+          createdAt = existing.createdAt;
+          updatedAt = Time.now();
+        };
+        announcements.add(announcementId, updated);
+      };
+    };
+  };
+
+  public shared ({ caller }) func deleteAnnouncement(announcementId : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can delete announcements");
+    };
+
+    switch (announcements.get(announcementId)) {
+      case (null) { Runtime.trap("Announcement not found") };
+      case (?_) {
+        announcements.remove(announcementId);
+      };
+    };
+  };
+
+  // ── Admin Dashboard ───────────────────────────────────────────────────────
+
   public query ({ caller }) func getAllBorrowRecords() : async [(Principal, [BorrowRecord])] {
-    // Only allow admins to view all borrow records
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view all borrow records");
     };
@@ -295,7 +614,6 @@ actor {
     booksBorrowed : Nat;
     overdueCount : Nat;
   } {
-    // Only allow admins to view dashboard stats
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view dashboard stats");
     };
@@ -327,7 +645,6 @@ actor {
   };
 
   public query ({ caller }) func getAllUsers() : async [(Principal, UserProfile)] {
-    // Only allow admins to list all users
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can list all users");
     };
@@ -335,7 +652,6 @@ actor {
   };
 
   public query ({ caller }) func getActiveUserCount() : async Nat {
-    // Only allow admins to get active user count
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view active user count");
     };
@@ -343,7 +659,6 @@ actor {
   };
 
   public shared ({ caller }) func incrementActiveUsers() : async () {
-    // Only allow users to register as active
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only registered users can register an active session");
     };
@@ -351,7 +666,6 @@ actor {
   };
 
   public shared ({ caller }) func decrementActiveUsers() : async () {
-    // Only allow users to deregister an active session
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only registered users can deregister an active session");
     };
@@ -360,3 +674,4 @@ actor {
     };
   };
 };
+

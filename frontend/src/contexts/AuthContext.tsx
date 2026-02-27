@@ -6,14 +6,17 @@ import { UserRole } from '../backend';
 interface AuthContextValue {
   userRole: UserRole | null;
   isRoleLoading: boolean;
+  /** Alias for isRoleLoading — kept for backward compatibility */
+  isLoading: boolean;
   setUserRole: (role: UserRole | null) => void;
   persistedPrincipal: string | null;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextValue>({
+export const AuthContext = createContext<AuthContextValue>({
   userRole: null,
   isRoleLoading: true,
+  isLoading: true,
   setUserRole: () => {},
   persistedPrincipal: null,
   logout: () => {},
@@ -74,7 +77,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // When identity changes, fetch role from backend
   useEffect(() => {
     if (!identity) {
-      // Not logged in — clear role but keep loading false
       setIsRoleLoading(false);
       return;
     }
@@ -84,7 +86,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try { localStorage.setItem(PRINCIPAL_KEY, principal); } catch { /* ignore */ }
 
     if (actorFetching || !actor) {
-      // Actor not ready yet — keep loading
       setIsRoleLoading(true);
       return;
     }
@@ -96,7 +97,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsRoleLoading(false);
       })
       .catch(() => {
-        // Fall back to stored role if fetch fails
         const stored = getStoredRole();
         if (stored) setUserRoleState(stored);
         setIsRoleLoading(false);
@@ -111,7 +111,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [identity, actorFetching]);
 
   return (
-    <AuthContext.Provider value={{ userRole, isRoleLoading, setUserRole, persistedPrincipal, logout }}>
+    <AuthContext.Provider
+      value={{
+        userRole,
+        isRoleLoading,
+        isLoading: isRoleLoading,
+        setUserRole,
+        persistedPrincipal,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

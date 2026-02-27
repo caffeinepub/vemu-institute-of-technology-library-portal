@@ -1,167 +1,129 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Revert to Version 8",
+  "title": "Fix missing features — Book Catalog empty, Student/Admin Dashboard not rendering data",
   "requirements": [
     {
-      "id": "REQ-28",
-      "summary": "Revert all frontend source files, components, pages, hooks, contexts, and configuration to their exact state at Version 8, discarding all Version 9 changes",
+      "id": "REQ-1",
+      "summary": "Fix Book Catalog data fetching and rendering so books are displayed correctly",
       "acceptanceCriteria": [
-        "The deployed application matches the state and behavior of Version 8.",
-        "All Version 9 changes are fully reverted.",
-        "The application builds and deploys without errors.",
-        "All features present in Version 8 are functional after the revert."
+        "Books stored in the backend canister are returned by the `getAllBooks` query",
+        "The Book Catalog on the Student Dashboard shows the correct book count (e.g., 'Showing X of Y books')",
+        "Individual book cards are rendered with title, author, category, and borrow/reserve actions",
+        "Search and category filter controls produce correct filtered results"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Revert to Version 8 state: restore the exact routing configuration, component structure, and provider setup that existed in Version 8"
-        },
-        {
-          "path": "frontend/src/main.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore the application entry point setup including all providers and initialization logic as they were in Version 8"
-        },
-        {
-          "path": "frontend/src/pages/LandingPage.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore the landing page hero section, statistics display, and feature grid to match Version 8 exactly"
-        },
-        {
-          "path": "frontend/src/pages/LoginPage.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore the login page authentication flow, role fetching logic, and redirect behavior as implemented in Version 8"
-        },
-        {
-          "path": "frontend/src/pages/SignUpPage.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore the sign-up page Internet Identity integration and post-authentication flow to Version 8"
-        },
-        {
-          "path": "frontend/src/pages/StudentDashboard.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore the student dashboard layout, tab structure, and catalog/borrowed books views to their Version 8 implementation"
-        },
-        {
-          "path": "frontend/src/pages/AdminDashboard.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore the admin dashboard sidebar, tab navigation, and overall structure as they existed in Version 8"
-        },
-        {
-          "path": "frontend/src/components/Navbar.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore navigation bar role-aware links, theme toggle, authentication controls, and mobile menu to Version 8"
-        },
-        {
-          "path": "frontend/src/components/Footer.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore footer branding, links, contact info, and copyright line to match Version 8"
+          "description": "Fix the useGetAllBooks hook to correctly call the backend actor method `getAllBooksSortedByTitle` instead of `getAllBooks`. Ensure the query is enabled only when the actor is available and not fetching. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/components/BookCatalog.tsx",
           "operation": "modify",
-          "description": "Revert to Version 8 state: restore book catalog search, filtering, grid display, and borrow functionality to Version 8 implementation"
+          "description": "Verify that the BookCatalog component correctly consumes the data from useGetAllBooks hook. Ensure loading states, error states, and empty states are properly handled. Confirm that book count display ('Showing X of Y books') correctly reflects the filtered results length and total books length. Verify search and category filtering logic produces the correct filtered array before rendering book cards."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Fix Student Dashboard tabs so Browse Books and My Borrowed Books render correctly",
+      "acceptanceCriteria": [
+        "Navigating to `/dashboard` renders the StudentDashboard page without a blank screen",
+        "The 'Browse Books' tab displays the book catalog with data",
+        "The 'My Borrowed Books' tab displays the user's active and historical borrowings",
+        "No console errors related to undefined actor methods or missing routes"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/StudentDashboard.tsx",
+          "operation": "modify",
+          "description": "Verify that the StudentDashboard page component correctly mounts and renders both tabs. Ensure the BookCatalog component is rendered in the 'Browse Books' tab and BorrowedBooksList is rendered in the 'My Borrowed Books' tab. Check that the component properly handles loading and error states for the user profile query (useGetCallerUserProfile). Confirm no undefined references or missing imports."
         },
         {
           "path": "frontend/src/components/BorrowedBooksList.tsx",
           "operation": "modify",
-          "description": "Revert to Version 8 state: restore borrowed books list tabs, overdue indicators, and return book action to Version 8"
-        },
-        {
-          "path": "frontend/src/components/ProfileSetupModal.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore profile setup modal user data collection and save logic to Version 8"
-        },
-        {
-          "path": "frontend/src/components/ThemeToggle.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore theme toggle button and switching logic to Version 8"
-        },
-        {
-          "path": "frontend/src/components/ProtectedRoute.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore route guard authentication checks and role-based access control to Version 8 implementation"
-        },
-        {
-          "path": "frontend/src/components/AnimatedCounter.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore animated counter component animation logic to Version 8"
-        },
-        {
-          "path": "frontend/src/components/admin/OverviewTab.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore admin overview tab stat cards and active members counter to Version 8"
-        },
-        {
-          "path": "frontend/src/components/admin/ManageBooksTab.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore admin books management table, search, delete functionality, and add book modal integration to Version 8"
-        },
-        {
-          "path": "frontend/src/components/admin/ManageUsersTab.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore admin users management table, search, and user display to Version 8"
-        },
-        {
-          "path": "frontend/src/components/admin/BorrowRecordsTab.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore admin borrow records table, filtering, search, and status display to Version 8"
-        },
-        {
-          "path": "frontend/src/components/admin/AddBookModal.tsx",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore add book modal form fields, validation, and mutation logic to Version 8"
-        },
-        {
-          "path": "frontend/src/hooks/useInternetIdentity.ts",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore Internet Identity authentication hook context, login/logout logic, and identity persistence to Version 8"
-        },
-        {
-          "path": "frontend/src/hooks/useActor.ts",
-          "operation": "modify",
-          "description": "Revert to Version 8 state: restore backend actor creation, caching, initialization, and query invalidation logic to Version 8"
+          "description": "Review the BorrowedBooksList component to ensure it correctly calls useGetMyBorrowHistory and useGetAllBooks hooks. Verify that the component properly maps book IDs to book details and handles cases where book data might be missing. Ensure loading skeletons and empty states are displayed appropriately."
         },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Revert to Version 8 state: restore all TanStack Query hooks for backend interactions including profile, roles, books CRUD, and borrow/return operations to Version 8"
+          "description": "Fix the useGetMyBorrowHistory hook to ensure it correctly calls the backend actor method `getMyBorrowHistory`. Verify the query is enabled only when the actor is available and the user is authenticated. Ensure proper error handling and retry logic."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Fix Admin Dashboard so all tabs load and display data correctly",
+      "acceptanceCriteria": [
+        "Navigating to `/admin` as an admin user renders the AdminDashboard with sidebar and tabs",
+        "The Overview tab displays stat cards with real data (total books, users, borrowed, overdue)",
+        "The Manage Books tab lists all books with add/edit/delete actions functional",
+        "The Manage Users tab lists all registered users",
+        "The Borrow Records tab lists all borrow records with correct status indicators",
+        "Non-admin users are redirected away from `/admin`"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Verify that the AdminDashboard page component is properly protected by the admin role guard via ProtectedRoute. Ensure all four tabs (Overview, Manage Books, Manage Users, Borrow Records) are correctly wired and render their respective components. Check that the sidebar navigation and tab switching logic works correctly without console errors."
         },
         {
-          "path": "frontend/src/contexts/AuthContext.tsx",
+          "path": "frontend/src/components/admin/OverviewTab.tsx",
           "operation": "modify",
-          "description": "Revert to Version 8 state: restore authentication context managing user role and principal state with localStorage persistence to Version 8"
+          "description": "Review the OverviewTab component to ensure it correctly calls useGetDashboardStats and useGetActiveUserCount hooks. Verify that stat cards display real data from the backend. Ensure loading states and error handling are properly implemented. Confirm AnimatedCounter components receive correct values."
         },
         {
-          "path": "frontend/src/contexts/ThemeContext.tsx",
+          "path": "frontend/src/components/admin/ManageBooksTab.tsx",
           "operation": "modify",
-          "description": "Revert to Version 8 state: restore theme context managing light/dark mode with localStorage persistence to Version 8"
+          "description": "Verify that ManageBooksTab correctly calls useGetAllBooks hook and displays books in a searchable, paginated table. Ensure add, edit, and delete actions are properly wired to their respective modals and mutations (useAddBook, useEditBook, useDeleteBook). Confirm role-based access control is enforced."
         },
         {
-          "path": "frontend/src/utils/urlParams.ts",
+          "path": "frontend/src/components/admin/ManageUsersTab.tsx",
           "operation": "modify",
-          "description": "Revert to Version 8 state: restore URL parameter utility functions for reading, storing, and clearing query and hash parameters to Version 8"
+          "description": "Review ManageUsersTab to ensure it correctly calls useGetAllUsers hook and displays users in a searchable table. Verify that user data (name, email, principal, role, join date) is properly mapped and rendered. Ensure loading and empty states are handled."
         },
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/components/admin/BorrowRecordsTab.tsx",
           "operation": "modify",
-          "description": "Revert to Version 8 state: restore global stylesheet with font imports, Tailwind setup, and CSS custom properties for color tokens to Version 8"
+          "description": "Verify that BorrowRecordsTab correctly calls useGetAllBorrowRecords and useGetAllBooks hooks. Ensure borrow records are displayed with correct status indicators (active, returned, overdue). Confirm search and filter functionality works as expected. Verify proper mapping of book IDs to book titles."
         },
         {
-          "path": "frontend/index.css",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Revert to Version 8 state: restore Tailwind CSS entry file OKLCH-based custom property tokens for themes to Version 8"
+          "description": "Fix all admin-related query hooks (useGetDashboardStats, useGetAllUsers, useGetAllBorrowRecords, useGetActiveUserCount) to ensure they correctly call their corresponding backend actor methods. Verify queries are enabled only when the actor is available and the user has admin role. Ensure proper error handling and data transformation where needed."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Fix actor initialization to ensure it's available before queries run",
+      "acceptanceCriteria": [
+        "The actor is initialized and available before dependent queries run",
+        "React Query hooks do not fire with an undefined actor",
+        "All queries transition from 'loading' to 'success' with data once the user is authenticated"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Review all query and mutation hooks in useQueries.ts to ensure they properly check for actor availability using `enabled: !!actor && !isFetching`. Verify that hooks correctly handle the case where actor is null/undefined and wait for it to be initialized before executing queries. Ensure consistent error handling across all hooks. Add proper TypeScript null checks where needed."
         },
         {
-          "path": "frontend/index.html",
+          "path": "frontend/src/components/BookCatalog.tsx",
           "operation": "modify",
-          "description": "Revert to Version 8 state: restore HTML entry point structure and script loading to Version 8"
+          "description": "Ensure the BookCatalog component properly handles the loading state from useGetAllBooks by checking both `isLoading` and actor fetching state. Display loading skeletons while data is being fetched. Ensure the component does not attempt to render data before the actor is initialized."
         },
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/pages/StudentDashboard.tsx",
           "operation": "modify",
-          "description": "Revert to Version 8 state: restore Tailwind configuration including fonts, color tokens, border radii, shadows, and animations to Version 8"
+          "description": "Verify that StudentDashboard waits for the actor to be initialized before rendering tabs. Use the loading state from useGetCallerUserProfile to show a loading spinner or skeleton while the session is initializing. Ensure no component attempts to call backend capabilities before authentication is complete."
+        },
+        {
+          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Ensure AdminDashboard properly waits for actor initialization and role verification before rendering tabs. Display a loading state while authentication and authorization are in progress. Verify that ProtectedRoute correctly guards the admin dashboard from non-admin users."
         }
       ]
     }

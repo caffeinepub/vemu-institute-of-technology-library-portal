@@ -1,36 +1,102 @@
 {
   "kind": "build_request",
-  "title": "Revert to Version 8",
+  "title": "Fix missing features — Book Catalog empty, Student/Admin Dashboard not rendering data",
   "projectName": "VEMU Library Portal",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-28",
-      "text": "Revert the entire application (both frontend and backend) to the state it was in at Version 8, discarding all changes introduced in Version 9. Version 8 is the last known-good state the user approved. Restore all frontend source files, backend Motoko code, and configuration to exactly match Version 8.",
+      "id": "REQ-1",
+      "text": "Fix the Book Catalog on the Student Dashboard so that books stored in the backend are fetched and displayed correctly. The page currently shows 'Showing 0 of 0 books' and 'No books found' even when books exist in the canister. Ensure the `getAllBooks` backend call is wired properly through the React Query hook in `useQueries.ts` and that the `BookCatalog` component receives and renders the data.",
       "target": "both",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "version 8 is good amg i wamt versiom 8"
+          "see this no features are added"
         ]
       },
       "acceptanceCriteria": [
-        "The deployed application matches the state and behavior of Version 8.",
-        "All Version 9 changes are fully reverted.",
-        "The application builds and deploys without errors.",
-        "All features present in Version 8 are functional after the revert."
+        "Books stored in the backend canister are returned by the `getAllBooks` query",
+        "The Book Catalog on the Student Dashboard shows the correct book count (e.g., 'Showing X of Y books')",
+        "Individual book cards are rendered with title, author, category, and borrow/reserve actions",
+        "Search and category filter controls produce correct filtered results"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Fix the Student Dashboard tabs so that both the 'Browse Books' tab (BookCatalog) and the 'My Borrowed Books' tab (BorrowedBooksList) render content correctly. Verify that the route `/dashboard` is properly registered in `App.tsx`, the `StudentDashboard` page component is mounted, and all required React Query hooks (`useGetAllBooks`, `useGetBorrowedBooks`) resolve without errors.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Navigating to `/dashboard` renders the StudentDashboard page without a blank screen",
+        "The 'Browse Books' tab displays the book catalog with data",
+        "The 'My Borrowed Books' tab displays the user's active and historical borrowings",
+        "No console errors related to undefined actor methods or missing routes"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Fix the Admin Dashboard so that all four tabs (Overview, Manage Books, Manage Users, Borrow Records) load and display data. Verify the `/admin` route is registered in `App.tsx`, the `AdminDashboard` page is protected by the admin role guard, and all React Query hooks used by admin tab components (`useGetAllBooks`, `useGetAllUsers`, `useGetAllBorrowRecords`, `useGetStats`) are correctly wired to the backend actor methods.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Navigating to `/admin` as an admin user renders the AdminDashboard with sidebar and tabs",
+        "The Overview tab displays stat cards with real data (total books, users, borrowed, overdue)",
+        "The Manage Books tab lists all books with add/edit/delete actions functional",
+        "The Manage Users tab lists all registered users",
+        "The Borrow Records tab lists all borrow records with correct status indicators",
+        "Non-admin users are redirected away from `/admin`"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Ensure all backend actor methods required by the frontend are exposed in `backend/main.mo`. Audit the methods called by `useQueries.ts` (e.g., `getAllBooks`, `getAllUsers`, `getAllBorrowRecords`, `borrowBook`, `returnBook`, `reserveBook`, `cancelReservation`, `approveReservation`, `rejectReservation`, `addBook`, `editBook`, `deleteBook`, `getAllAnnouncements`, `getAllDigitalResources`, etc.) and confirm they are all implemented and publicly accessible in the actor.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All methods called by `useQueries.ts` are present and public in `backend/main.mo`",
+        "Each method returns the correct type matching the frontend's expected shape",
+        "No runtime 'method not found' errors occur when the frontend calls the actor"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Fix the actor initialization in `useActor.ts` so the authenticated actor is properly created and cached before any query hooks attempt to call backend methods. Ensure the actor is passed correctly to all query and mutation hooks in `useQueries.ts` so no hook silently skips fetching due to a null or undefined actor reference.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The actor is initialized and available before dependent queries run",
+        "React Query hooks do not fire with an undefined actor",
+        "All queries transition from 'loading' to 'success' with data once the user is authenticated"
       ]
     }
   ],
   "constraints": [
-    "Do not carry over any changes introduced in Version 9.",
-    "Restore to Version 8 state exactly — do not modify or improve anything beyond what was in Version 8."
+    "Do not change the existing URL routes (/dashboard, /admin)",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "Preserve existing role-based access control logic"
   ],
   "nonGoals": [
-    "Introducing any new features or fixes not present in Version 8.",
-    "Applying Version 9 changes selectively or partially."
+    "Adding new features beyond what is already implemented in the codebase",
+    "Redesigning the UI or changing the visual theme",
+    "Adding new backend data models or schema changes"
   ],
   "imageRequirements": {
     "required": [],

@@ -8,6 +8,17 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const Time = IDL.Int;
+export const AnnouncementPriority = IDL.Variant({
+  'normal' : IDL.Null,
+  'urgent' : IDL.Null,
+});
+export const AnnouncementCreateData = IDL.Record({
+  'title' : IDL.Text,
+  'publishDate' : Time,
+  'body' : IDL.Text,
+  'priority' : AnnouncementPriority,
+});
 export const BookCreateData = IDL.Record({
   'title' : IDL.Text,
   'isbn' : IDL.Text,
@@ -16,12 +27,26 @@ export const BookCreateData = IDL.Record({
   'totalCopies' : IDL.Nat,
   'category' : IDL.Text,
 });
+export const DigitalResourceCreateData = IDL.Record({
+  'url' : IDL.Text,
+  'title' : IDL.Text,
+  'description' : IDL.Text,
+  'category' : IDL.Text,
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
-export const Time = IDL.Int;
+export const Announcement = IDL.Record({
+  'id' : IDL.Text,
+  'title' : IDL.Text,
+  'publishDate' : Time,
+  'body' : IDL.Text,
+  'createdAt' : Time,
+  'updatedAt' : Time,
+  'priority' : AnnouncementPriority,
+});
 export const Book = IDL.Record({
   'id' : IDL.Text,
   'title' : IDL.Text,
@@ -40,6 +65,29 @@ export const BorrowRecord = IDL.Record({
   'bookId' : IDL.Text,
   'returnedAt' : IDL.Opt(Time),
 });
+export const DigitalResource = IDL.Record({
+  'id' : IDL.Text,
+  'url' : IDL.Text,
+  'title' : IDL.Text,
+  'description' : IDL.Text,
+  'addedAt' : Time,
+  'category' : IDL.Text,
+});
+export const ReservationStatus = IDL.Variant({
+  'cancelled' : IDL.Null,
+  'pending' : IDL.Null,
+  'approved' : IDL.Null,
+  'rejected' : IDL.Null,
+});
+export const Reservation = IDL.Record({
+  'id' : IDL.Text,
+  'status' : ReservationStatus,
+  'userId' : IDL.Principal,
+  'createdAt' : Time,
+  'dueDate' : IDL.Opt(Time),
+  'bookId' : IDL.Text,
+  'updatedAt' : Time,
+});
 export const UserProfile = IDL.Record({
   'name' : IDL.Text,
   'joinedAt' : Time,
@@ -49,19 +97,39 @@ export const UserProfile = IDL.Record({
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addAnnouncement' : IDL.Func([AnnouncementCreateData], [IDL.Text], []),
   'addBook' : IDL.Func([BookCreateData], [], []),
+  'addDigitalResource' : IDL.Func([DigitalResourceCreateData], [IDL.Text], []),
+  'approveReservation' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'borrowBook' : IDL.Func([IDL.Text], [], []),
+  'cancelReservation' : IDL.Func([IDL.Text], [], []),
+  'createReservation' : IDL.Func([IDL.Text], [IDL.Text], []),
   'decrementActiveUsers' : IDL.Func([], [], []),
+  'deleteAnnouncement' : IDL.Func([IDL.Text], [], []),
   'deleteBook' : IDL.Func([IDL.Text], [], []),
+  'deleteDigitalResource' : IDL.Func([IDL.Text], [], []),
+  'editAnnouncement' : IDL.Func([IDL.Text, AnnouncementCreateData], [], []),
   'editBook' : IDL.Func([IDL.Text, BookCreateData], [], []),
+  'editDigitalResource' : IDL.Func(
+      [IDL.Text, DigitalResourceCreateData],
+      [],
+      [],
+    ),
   'getActiveUserCount' : IDL.Func([], [IDL.Nat], ['query']),
+  'getAllAnnouncements' : IDL.Func([], [IDL.Vec(Announcement)], ['query']),
   'getAllBooksSortedByTitle' : IDL.Func([], [IDL.Vec(Book)], ['query']),
   'getAllBorrowRecords' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(BorrowRecord)))],
       ['query'],
     ),
+  'getAllDigitalResources' : IDL.Func(
+      [],
+      [IDL.Vec(DigitalResource)],
+      ['query'],
+    ),
+  'getAllReservations' : IDL.Func([], [IDL.Vec(Reservation)], ['query']),
   'getAllUsers' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(IDL.Principal, UserProfile))],
@@ -83,6 +151,7 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getMyBorrowHistory' : IDL.Func([], [IDL.Vec(BorrowRecord)], ['query']),
+  'getMyReservations' : IDL.Func([], [IDL.Vec(Reservation)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
@@ -92,6 +161,7 @@ export const idlService = IDL.Service({
   'incrementActiveUsers' : IDL.Func([], [], []),
   'initialize' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'rejectReservation' : IDL.Func([IDL.Text], [], []),
   'returnBook' : IDL.Func([IDL.Text], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
 });
@@ -99,6 +169,17 @@ export const idlService = IDL.Service({
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const Time = IDL.Int;
+  const AnnouncementPriority = IDL.Variant({
+    'normal' : IDL.Null,
+    'urgent' : IDL.Null,
+  });
+  const AnnouncementCreateData = IDL.Record({
+    'title' : IDL.Text,
+    'publishDate' : Time,
+    'body' : IDL.Text,
+    'priority' : AnnouncementPriority,
+  });
   const BookCreateData = IDL.Record({
     'title' : IDL.Text,
     'isbn' : IDL.Text,
@@ -107,12 +188,26 @@ export const idlFactory = ({ IDL }) => {
     'totalCopies' : IDL.Nat,
     'category' : IDL.Text,
   });
+  const DigitalResourceCreateData = IDL.Record({
+    'url' : IDL.Text,
+    'title' : IDL.Text,
+    'description' : IDL.Text,
+    'category' : IDL.Text,
+  });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
-  const Time = IDL.Int;
+  const Announcement = IDL.Record({
+    'id' : IDL.Text,
+    'title' : IDL.Text,
+    'publishDate' : Time,
+    'body' : IDL.Text,
+    'createdAt' : Time,
+    'updatedAt' : Time,
+    'priority' : AnnouncementPriority,
+  });
   const Book = IDL.Record({
     'id' : IDL.Text,
     'title' : IDL.Text,
@@ -131,6 +226,29 @@ export const idlFactory = ({ IDL }) => {
     'bookId' : IDL.Text,
     'returnedAt' : IDL.Opt(Time),
   });
+  const DigitalResource = IDL.Record({
+    'id' : IDL.Text,
+    'url' : IDL.Text,
+    'title' : IDL.Text,
+    'description' : IDL.Text,
+    'addedAt' : Time,
+    'category' : IDL.Text,
+  });
+  const ReservationStatus = IDL.Variant({
+    'cancelled' : IDL.Null,
+    'pending' : IDL.Null,
+    'approved' : IDL.Null,
+    'rejected' : IDL.Null,
+  });
+  const Reservation = IDL.Record({
+    'id' : IDL.Text,
+    'status' : ReservationStatus,
+    'userId' : IDL.Principal,
+    'createdAt' : Time,
+    'dueDate' : IDL.Opt(Time),
+    'bookId' : IDL.Text,
+    'updatedAt' : Time,
+  });
   const UserProfile = IDL.Record({
     'name' : IDL.Text,
     'joinedAt' : Time,
@@ -140,19 +258,43 @@ export const idlFactory = ({ IDL }) => {
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addAnnouncement' : IDL.Func([AnnouncementCreateData], [IDL.Text], []),
     'addBook' : IDL.Func([BookCreateData], [], []),
+    'addDigitalResource' : IDL.Func(
+        [DigitalResourceCreateData],
+        [IDL.Text],
+        [],
+      ),
+    'approveReservation' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'borrowBook' : IDL.Func([IDL.Text], [], []),
+    'cancelReservation' : IDL.Func([IDL.Text], [], []),
+    'createReservation' : IDL.Func([IDL.Text], [IDL.Text], []),
     'decrementActiveUsers' : IDL.Func([], [], []),
+    'deleteAnnouncement' : IDL.Func([IDL.Text], [], []),
     'deleteBook' : IDL.Func([IDL.Text], [], []),
+    'deleteDigitalResource' : IDL.Func([IDL.Text], [], []),
+    'editAnnouncement' : IDL.Func([IDL.Text, AnnouncementCreateData], [], []),
     'editBook' : IDL.Func([IDL.Text, BookCreateData], [], []),
+    'editDigitalResource' : IDL.Func(
+        [IDL.Text, DigitalResourceCreateData],
+        [],
+        [],
+      ),
     'getActiveUserCount' : IDL.Func([], [IDL.Nat], ['query']),
+    'getAllAnnouncements' : IDL.Func([], [IDL.Vec(Announcement)], ['query']),
     'getAllBooksSortedByTitle' : IDL.Func([], [IDL.Vec(Book)], ['query']),
     'getAllBorrowRecords' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(BorrowRecord)))],
         ['query'],
       ),
+    'getAllDigitalResources' : IDL.Func(
+        [],
+        [IDL.Vec(DigitalResource)],
+        ['query'],
+      ),
+    'getAllReservations' : IDL.Func([], [IDL.Vec(Reservation)], ['query']),
     'getAllUsers' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Principal, UserProfile))],
@@ -174,6 +316,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getMyBorrowHistory' : IDL.Func([], [IDL.Vec(BorrowRecord)], ['query']),
+    'getMyReservations' : IDL.Func([], [IDL.Vec(Reservation)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
@@ -183,6 +326,7 @@ export const idlFactory = ({ IDL }) => {
     'incrementActiveUsers' : IDL.Func([], [], []),
     'initialize' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'rejectReservation' : IDL.Func([IDL.Text], [], []),
     'returnBook' : IDL.Func([IDL.Text], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   });

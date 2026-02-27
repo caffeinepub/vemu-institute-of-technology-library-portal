@@ -1,93 +1,115 @@
-import React, { useState, useMemo } from 'react';
-import { BookMarked, Search, Filter } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, BookMarked, Clock, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useGetAllBorrowRecords, useGetAllBooks } from '../../hooks/useQueries';
+import type { BorrowRecord } from '../../backend';
 
 function formatDate(ns: bigint): string {
   const ms = Number(ns) / 1_000_000;
-  return new Date(ms).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  return new Date(ms).toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
-function truncatePrincipal(p: string): string {
-  if (p.length <= 16) return p;
-  return `${p.slice(0, 8)}...${p.slice(-6)}`;
-}
+type StatusFilter = 'all' | 'active' | 'returned' | 'overdue';
 
-function isOverdue(dueDate: bigint, returnedAt?: bigint): boolean {
-  if (returnedAt) return false;
-  return Date.now() > Number(dueDate) / 1_000_000;
+function getStatus(record: BorrowRecord): 'active' | 'returned' | 'overdue' {
+  if (record.returnedAt !== undefined && record.returnedAt !== null) return 'returned';
+  const nowNs = BigInt(Date.now()) * 1_000_000n;
+  if (nowNs > record.dueDate) return 'overdue';
+  return 'active';
 }
 
 export default function BorrowRecordsTab() {
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'returned' | 'overdue'>('all');
-  const { data: allRecords = [], isLoading } = useGetAllBorrowRecords();
-  const { data: books = [] } = useGetAllBooks();
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
-  const bookMap = useMemo(() => {
-    const map = new Map<string, string>();
-    books.forEach(b => map.set(b.id, b.title));
-    return map;
-  }, [books]);
+  const { data: borrowRecords = [], isLoading: recordsLoading } = useGetAllBorrowRecords();
+  const { data: allBooks = [], isLoading: booksLoading } = useGetAllBooks();
 
-  // Flatten records
-  const flatRecords = useMemo(() => {
-    return allRecords.flatMap(([principal, records]) =>
-      records.map(record => ({ principal, record }))
+  const isLoading = recordsLoading || booksLoading;
+
+  // Build book map
+  const bookMap = React.useMemo(() => {
+    return new Map(allBooks.map((b) => [b.id, b]));
+  }, [allBooks]);
+
+  // Flatten all records with principal info
+  const flatRecords = React.useMemo(() => {
+    return borrowRecords.flatMap(([principal, records]) =>
+      records.map((record) => ({ principal, record }))
     );
-  }, [allRecords]);
+  }, [borrowRecords]);
 
-  const filtered = useMemo(() => {
+  // Apply filters
+  const filteredRecords = React.useMemo(() => {
     return flatRecords.filter(({ principal, record }) => {
-      const bookTitle = bookMap.get(record.bookId) || record.bookId;
-      const principalStr = principal.toString();
+      const book = bookMap.get(record.bookId);
+      const status = getStatus(record);
 
+      const matchesStatus = statusFilter === 'all' || status === statusFilter;
+
+      const q = search.toLowerCase();
       const matchesSearch =
-        !search ||
-        bookTitle.toLowerCase().includes(search.toLowerCase()) ||
-        principalStr.toLowerCase().includes(search.toLowerCase());
+        q === '' ||
+        (book?.title ?? '').toLowerCase().includes(q) ||
+        principal.toString().toLowerCase().includes(q);
 
-      const overdue = isOverdue(record.dueDate, record.returnedAt);
-      const matchesStatus =
-        statusFilter === 'all' ||
-        (statusFilter === 'active' && !record.returnedAt && !overdue) ||
-        (statusFilter === 'returned' && !!record.returnedAt) ||
-        (statusFilter === 'overdue' && overdue);
-
-      return matchesSearch && matchesStatus;
+      return matchesStatus && matchesSearch;
     });
-  }, [flatRecords, search, statusFilter, bookMap]);
+  }, [flatRecords, bookMap, search, statusFilter]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-12 rounded-lg" />
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h2 className="font-heading text-xl font-bold">Borrow Records</h2>
-        <p className="text-muted-foreground text-sm">{flatRecords.length} total records</p>
-      </div>
-
+    <div className="space-y-4">
+      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
+        <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by book title or user..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
             className="pl-9"
+            placeholder="Search by book or user..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
-          <SelectTrigger className="w-full sm:w-44">
-            <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
+        <Select
+          value={statusFilter}
+          onValueChange={(v) => setStatusFilter(v as StatusFilter)}
+        >
+          <SelectTrigger className="w-full sm:w-40">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Records</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="returned">Returned</SelectItem>
             <SelectItem value="overdue">Overdue</SelectItem>
@@ -95,81 +117,86 @@ export default function BorrowRecordsTab() {
         </Select>
       </div>
 
-      <div className="card-premium overflow-hidden">
-        <div className="overflow-x-auto">
+      {/* Summary */}
+      <p className="text-sm text-muted-foreground">
+        Showing {filteredRecords.length} of {flatRecords.length} records
+      </p>
+
+      {/* Table */}
+      {filteredRecords.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <BookMarked className="w-12 h-12 text-muted-foreground mb-4" />
+          <p className="text-lg font-semibold">No records found</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {flatRecords.length === 0
+              ? 'No books have been borrowed yet'
+              : 'Try adjusting your filters'}
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-lg border border-border overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="font-semibold">Book Title</TableHead>
-                <TableHead className="font-semibold">User</TableHead>
-                <TableHead className="font-semibold">Borrowed</TableHead>
-                <TableHead className="font-semibold">Due Date</TableHead>
-                <TableHead className="font-semibold">Returned</TableHead>
-                <TableHead className="font-semibold">Status</TableHead>
+              <TableRow>
+                <TableHead>Book</TableHead>
+                <TableHead>User</TableHead>
+                <TableHead>Borrowed</TableHead>
+                <TableHead>Due</TableHead>
+                <TableHead>Returned</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}>
-                    {Array.from({ length: 6 }).map((_, j) => (
-                      <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                    <BookMarked className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                    <p>No records found</p>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filtered.map(({ principal, record }, idx) => {
-                  const overdue = isOverdue(record.dueDate, record.returnedAt);
-                  const bookTitle = bookMap.get(record.bookId) || record.bookId;
+              {filteredRecords.map(({ principal, record }) => {
+                const book = bookMap.get(record.bookId);
+                const status = getStatus(record);
 
-                  return (
-                    <TableRow key={`${principal}-${record.id}-${idx}`} className="hover:bg-muted/30 transition-colors">
-                      <TableCell className="font-medium text-sm max-w-[180px]">
-                        <span className="line-clamp-1 font-heading">{bookTitle}</span>
-                      </TableCell>
-                      <TableCell>
-                        <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono">
-                          {truncatePrincipal(principal.toString())}
-                        </code>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {formatDate(record.borrowedAt)}
-                      </TableCell>
-                      <TableCell className={`text-sm ${overdue ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
-                        {formatDate(record.dueDate)}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {record.returnedAt ? formatDate(record.returnedAt) : '—'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={record.returnedAt ? 'secondary' : overdue ? 'destructive' : 'default'}
-                          className={
-                            record.returnedAt
-                              ? 'bg-success/15 text-success border-success/20 text-xs'
-                              : overdue
-                              ? 'text-xs'
-                              : 'bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold border-navy/20 dark:border-gold/20 text-xs'
-                          }
-                        >
-                          {record.returnedAt ? 'Returned' : overdue ? 'Overdue' : 'Active'}
+                return (
+                  <TableRow key={`${principal.toString()}-${record.id}`}>
+                    <TableCell className="font-medium max-w-[180px] truncate">
+                      {book?.title ?? record.bookId}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground max-w-[120px] truncate">
+                      {principal.toString().slice(0, 12)}…
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {formatDate(record.borrowedAt)}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {formatDate(record.dueDate)}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {record.returnedAt !== undefined && record.returnedAt !== null
+                        ? formatDate(record.returnedAt)
+                        : '—'}
+                    </TableCell>
+                    <TableCell>
+                      {status === 'returned' && (
+                        <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                          <CheckCircle2 className="w-3 h-3" />
+                          Returned
                         </Badge>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
+                      )}
+                      {status === 'active' && (
+                        <Badge variant="outline" className="flex items-center gap-1 w-fit text-green-600 border-green-600">
+                          <Clock className="w-3 h-3" />
+                          Active
+                        </Badge>
+                      )}
+                      {status === 'overdue' && (
+                        <Badge variant="destructive" className="flex items-center gap-1 w-fit">
+                          <AlertTriangle className="w-3 h-3" />
+                          Overdue
+                        </Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -1,59 +1,109 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T00:53:11.204Z",
+  "generatedAt": "2026-02-27T07:53:30.208Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 0,
+    "total": 5,
+    "implemented": 4,
     "items": [
       {
-        "id": "REQ-28",
-        "summary": "Revert the entire application (both frontend and backend) to the state it was in at Version 8, discarding all changes introduced in Version 9. Version 8 is the last known-good state the user approved. Restore all frontend source files, backend Motoko code, and configuration to exactly match Version 8.",
-        "status": "missing",
+        "id": "REQ-1",
+        "summary": "Fix the Book Catalog on the Student Dashboard so that books stored in the backend are fetched and displayed correctly. The page currently shows 'Showing 0 of 0 books' and 'No books found' even when books exist in the canister. Ensure the `getAllBooks` backend call is wired properly through the React Query hook in `useQueries.ts` and that the `BookCatalog` component receives and renders the data.",
+        "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/main.tsx",
-          "frontend/src/pages/LandingPage.tsx",
-          "frontend/src/pages/LoginPage.tsx",
-          "frontend/src/pages/SignUpPage.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/BookCatalog.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/BookCatalog.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Fix the Student Dashboard tabs so that both the 'Browse Books' tab (BookCatalog) and the 'My Borrowed Books' tab (BorrowedBooksList) render content correctly. Verify that the route `/dashboard` is properly registered in `App.tsx`, the `StudentDashboard` page component is mounted, and all required React Query hooks (`useGetAllBooks`, `useGetBorrowedBooks`) resolve without errors.",
+        "status": "implemented",
+        "plannedFiles": [
           "frontend/src/pages/StudentDashboard.tsx",
-          "frontend/src/pages/AdminDashboard.tsx",
-          "frontend/src/components/Navbar.tsx",
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/components/BookCatalog.tsx",
           "frontend/src/components/BorrowedBooksList.tsx",
-          "frontend/src/components/ProfileSetupModal.tsx",
-          "frontend/src/components/ThemeToggle.tsx",
-          "frontend/src/components/ProtectedRoute.tsx",
-          "frontend/src/components/AnimatedCounter.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/StudentDashboard.tsx",
+          "frontend/src/components/BorrowedBooksList.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Fix the Admin Dashboard so that all four tabs (Overview, Manage Books, Manage Users, Borrow Records) load and display data. Verify the `/admin` route is registered in `App.tsx`, the `AdminDashboard` page is protected by the admin role guard, and all React Query hooks used by admin tab components (`useGetAllBooks`, `useGetAllUsers`, `useGetAllBorrowRecords`, `useGetStats`) are correctly wired to the backend actor methods.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/AdminDashboard.tsx",
           "frontend/src/components/admin/OverviewTab.tsx",
           "frontend/src/components/admin/ManageBooksTab.tsx",
           "frontend/src/components/admin/ManageUsersTab.tsx",
           "frontend/src/components/admin/BorrowRecordsTab.tsx",
-          "frontend/src/components/admin/AddBookModal.tsx",
-          "frontend/src/hooks/useInternetIdentity.ts",
-          "frontend/src/hooks/useActor.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/contexts/AuthContext.tsx",
-          "frontend/src/contexts/ThemeContext.tsx",
-          "frontend/src/utils/urlParams.ts",
-          "frontend/src/index.css",
-          "frontend/index.css",
-          "frontend/index.html",
-          "frontend/tailwind.config.js"
+          "frontend/src/hooks/useQueries.ts"
         ],
+        "matchedFiles": [
+          "frontend/src/pages/AdminDashboard.tsx",
+          "frontend/src/components/admin/OverviewTab.tsx",
+          "frontend/src/components/admin/ManageBooksTab.tsx",
+          "frontend/src/components/admin/ManageUsersTab.tsx",
+          "frontend/src/components/admin/BorrowRecordsTab.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Ensure all backend actor methods required by the frontend are exposed in `backend/main.mo`. Audit the methods called by `useQueries.ts` (e.g., `getAllBooks`, `getAllUsers`, `getAllBorrowRecords`, `borrowBook`, `returnBook`, `reserveBook`, `cancelReservation`, `approveReservation`, `rejectReservation`, `addBook`, `editBook`, `deleteBook`, `getAllAnnouncements`, `getAllDigitalResources`, etc.) and confirm they are all implemented and publicly accessible in the actor.",
+        "status": "unknown",
+        "plannedFiles": [],
         "matchedFiles": []
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Fix the actor initialization in `useActor.ts` so the authenticated actor is properly created and cached before any query hooks attempt to call backend methods. Ensure the actor is passed correctly to all query and mutation hooks in `useQueries.ts` so no hook silently skips fetching due to a null or undefined actor reference.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/BookCatalog.tsx",
+          "frontend/src/pages/StudentDashboard.tsx",
+          "frontend/src/pages/AdminDashboard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/BookCatalog.tsx",
+          "frontend/src/pages/StudentDashboard.tsx",
+          "frontend/src/pages/AdminDashboard.tsx"
+        ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
+    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/components/BookCatalog.tsx",
+    "frontend/src/components/BorrowedBooksList.tsx",
+    "frontend/src/components/ProfileSetupModal.tsx",
+    "frontend/src/components/admin/AddBookModal.tsx",
+    "frontend/src/components/admin/BorrowRecordsTab.tsx",
+    "frontend/src/components/admin/ManageBooksTab.tsx",
+    "frontend/src/components/admin/ManageUsersTab.tsx",
+    "frontend/src/components/admin/OverviewTab.tsx",
+    "frontend/src/contexts/AuthContext.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/AdminDashboard.tsx",
+    "frontend/src/pages/DigitalResources.tsx",
+    "frontend/src/pages/StudentDashboard.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

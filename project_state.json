@@ -1,199 +1,42 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 21,
-  "summary": "Full-stack VEMU Institute of Technology Library Portal web app with landing page (animated stats, hero section), user authentication (signup/login), admin dashboard for managing books and users, dark mode, mobile-responsive navigation, and role-based access.",
-  "architectural_notes": [
-    "Full-stack web application for VEMU Institute of Technology Library Portal",
-    "Premium UI with dark mode and mobile-responsive design",
-    "Admin session must be persistent across page reloads (stored in localStorage or equivalent)"
-  ],
+  "projectStateVersion": 3,
+  "summary": "Book and student management app with Book Catalog, Student Dashboard, and Admin Dashboard features that are not yet appearing in the deployed version.",
+  "architectural_notes": [],
   "known_issues": [
-    "Admin login session not persisting; admin features not working after login",
-    "Deployment to production failed with a deployment error in Version 8"
+    "Deployed versions are not reflecting newly added features (Book Catalog, Student Dashboard, Admin Dashboard)"
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-build-a-public-landing-page-with-1-a-full-width-hero-section-featuring-the-vemu-institute-of-technology-library-portal-name-a-tagline-and-cta-buttons-for-login-and-sign-up-2-an-animated-stats-bar-showing-live-fetched-numbers-total-books-registered-users-books-borrowed-3-a-features-highlights-section-describing-library-services-4-a-footer-with-institute-branding",
-      "title": "Build a public landing page with: (1) a full-width hero section featuring the VEMU Institute of Technology Library Portal name, a tagline, and CTA buttons for Login and Sign Up; (2) an animated stats bar showing live-fetched numbers (total books, registered users, books borrowed); (3) a features/highlights section describing library services; (4) a footer with institute branding.",
+      "id": "feature-fix-the-book-catalog-on-the-student-dashboard-so-that-books-stored-in-the-backend-are-fetched-and-displayed-correctly-the-page-currently-shows-showing-0-of-0-books-and-no-books-found-even-when-books-exist-in-the-canister-ensure-the-getallbooks-backend-call-is-wired-properly-through-the-react-query-hook-in-usequeries-ts-and-that-the-bookcatalog-component-receives-and-renders-the-data",
+      "title": "Fix the Book Catalog on the Student Dashboard so that books stored in the backend are fetched and displayed correctly. The page currently shows 'Showing 0 of 0 books' and 'No books found' even when books exist in the canister. Ensure the `getAllBooks` backend call is wired properly through the React Query hook in `useQueries.ts` and that the `BookCatalog` component receives and renders the data.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-student-dashboard-tabs-so-that-both-the-browse-books-tab-bookcatalog-and-the-my-borrowed-books-tab-borrowedbookslist-render-content-correctly-verify-that-the-route-dashboard-is-properly-registered-in-app-tsx-the-studentdashboard-page-component-is-mounted-and-all-required-react-query-hooks-usegetallbooks-usegetborrowedbooks-resolve-without-errors",
+      "title": "Fix the Student Dashboard tabs so that both the 'Browse Books' tab (BookCatalog) and the 'My Borrowed Books' tab (BorrowedBooksList) render content correctly. Verify that the route `/dashboard` is properly registered in `App.tsx`, the `StudentDashboard` page component is mounted, and all required React Query hooks (`useGetAllBooks`, `useGetBorrowedBooks`) resolve without errors.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-user-authentication-flows-1-sign-up-page-collect-name-email-password-confirm-password-on-submit-call-backend-register-function-and-redirect-to-student-dashboard-2-login-page-collect-email-and-password-on-submit-authenticate-against-backend-and-redirect-based-on-role-student-dashboard-or-admin-dashboard-3-logout-clears-session-state-and-redirects-to-landing-page-store-authenticated-user-state-in-react-context-react-query",
-      "title": "Implement user authentication flows: (1) Sign Up page — collect name, email, password, confirm password; on submit, call backend register function and redirect to student dashboard; (2) Login page — collect email and password; on submit, authenticate against backend and redirect based on role (student dashboard or admin dashboard); (3) Logout clears session state and redirects to landing page. Store authenticated user state in React context/React Query.",
+      "id": "feature-fix-the-admin-dashboard-so-that-all-four-tabs-overview-manage-books-manage-users-borrow-records-load-and-display-data-verify-the-admin-route-is-registered-in-app-tsx-the-admindashboard-page-is-protected-by-the-admin-role-guard-and-all-react-query-hooks-used-by-admin-tab-components-usegetallbooks-usegetallusers-usegetallborrowrecords-usegetstats-are-correctly-wired-to-the-backend-actor-methods",
+      "title": "Fix the Admin Dashboard so that all four tabs (Overview, Manage Books, Manage Users, Borrow Records) load and display data. Verify the `/admin` route is registered in `App.tsx`, the `AdminDashboard` page is protected by the admin role guard, and all React Query hooks used by admin tab components (`useGetAllBooks`, `useGetAllUsers`, `useGetAllBorrowRecords`, `useGetStats`) are correctly wired to the backend actor methods.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-build-a-student-dashboard-protected-role-student-with-1-a-searchable-filterable-book-catalog-listing-all-available-books-with-title-author-category-and-available-copies-2-a-borrow-button-on-each-book-that-calls-the-backend-borrow-function-disabled-if-no-copies-available-3-a-my-borrowed-books-section-showing-active-borrows-with-due-dates-and-a-return-button-4-borrow-history-tab-showing-past-records",
-      "title": "Build a Student Dashboard (protected, role: student) with: (1) a searchable, filterable book catalog listing all available books with title, author, category, and available copies; (2) a Borrow button on each book that calls the backend borrow function (disabled if no copies available); (3) a 'My Borrowed Books' section showing active borrows with due dates and a Return button; (4) borrow history tab showing past records.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-build-an-admin-dashboard-protected-role-admin-with-1-sidebar-navigation-with-sections-overview-manage-books-manage-users-borrow-records-2-overview-tab-showing-animated-stat-cards-total-books-total-users-books-borrowed-overdue-3-manage-books-tab-with-a-table-of-all-books-add-book-form-modal-edit-book-and-delete-book-4-manage-users-tab-with-a-table-of-all-users-role-badge-and-ability-to-delete-users-5-borrow-records-tab-showing-all-borrow-history-with-filters",
-      "title": "Build an Admin Dashboard (protected, role: admin) with: (1) sidebar navigation with sections: Overview, Manage Books, Manage Users, Borrow Records; (2) Overview tab showing animated stat cards (total books, total users, books borrowed, overdue); (3) Manage Books tab with a table of all books, Add Book form/modal, Edit Book, and Delete Book; (4) Manage Users tab with a table of all users, role badge, and ability to delete users; (5) Borrow Records tab showing all borrow history with filters.",
+      "id": "feature-fix-the-actor-initialization-in-useactor-ts-so-the-authenticated-actor-is-properly-created-and-cached-before-any-query-hooks-attempt-to-call-backend-methods-ensure-the-actor-is-passed-correctly-to-all-query-and-mutation-hooks-in-usequeries-ts-so-no-hook-silently-skips-fetching-due-to-a-null-or-undefined-actor-reference",
+      "title": "Fix the actor initialization in `useActor.ts` so the authenticated actor is properly created and cached before any query hooks attempt to call backend methods. Ensure the actor is passed correctly to all query and mutation hooks in `useQueries.ts` so no hook silently skips fetching due to a null or undefined actor reference.",
       "reqIds": [
         "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-dark-mode-support-provide-a-toggle-in-the-navigation-bar-that-switches-between-light-and-dark-themes-persist-the-user-s-preference-in-localstorage-and-apply-it-on-page-load",
-      "title": "Implement dark mode support: provide a toggle in the navigation bar that switches between light and dark themes. Persist the user's preference in localStorage and apply it on page load.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-a-fully-mobile-responsive-navigation-bar-with-a-logo-institute-name-on-the-left-nav-links-in-the-center-for-desktop-and-a-hamburger-menu-on-mobile-that-opens-a-slide-in-drawer-with-all-navigation-links-and-the-dark-mode-toggle",
-      "title": "Implement a fully mobile-responsive navigation bar with: a logo/institute name on the left, nav links in the center for desktop, and a hamburger menu on mobile that opens a slide-in drawer with all navigation links and the dark mode toggle.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-a-premium-academic-visual-theme-throughout-the-app-use-deep-navy-and-gold-as-primary-brand-colors-with-warm-off-white-backgrounds-in-light-mode-and-deep-charcoal-surfaces-in-dark-mode-use-a-clean-serif-or-professional-sans-serif-font-for-headings-and-a-readable-sans-serif-for-body-text-use-card-based-layouts-with-subtle-shadows-smooth-transitions-and-consistent-spacing-the-aesthetic-should-evoke-an-academic-institution-s-prestige-and-trustworthiness",
-      "title": "Apply a premium academic visual theme throughout the app: use deep navy and gold as primary brand colors with warm off-white backgrounds in light mode and deep charcoal surfaces in dark mode. Use a clean serif or professional sans-serif font for headings and a readable sans-serif for body text. Use card-based layouts with subtle shadows, smooth transitions, and consistent spacing. The aesthetic should evoke an academic institution's prestige and trustworthiness.",
-      "reqIds": [
-        "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-generate-and-render-a-custom-hero-background-image-and-a-library-logo-icon-as-static-assets-in-frontend-public-assets-generated-and-use-them-in-the-landing-page-hero-section-and-navigation-bar-respectively",
-      "title": "Generate and render a custom hero background image and a library logo icon as static assets in frontend/public/assets/generated, and use them in the landing page hero section and navigation bar respectively.",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-the-landing-page-hero-section-frontend-src-pages-landingpage-tsx-render-vemu-institute-of-technology-as-a-large-bold-prominently-styled-heading-that-visually-dominates-the-foreground-it-must-be-the-largest-text-element-in-the-hero-use-the-gold-brand-color-or-a-high-contrast-highlight-treatment-e-g-gold-text-gold-underline-or-a-glowing-outlined-style-and-sit-at-the-very-front-of-the-hero-layering-highest-z-index-among-hero-content-the-text-size-should-be-significantly-larger-than-the-existing-tagline-and-subtitle-text",
-      "title": "In the landing page hero section (frontend/src/pages/LandingPage.tsx), render 'VEMU INSTITUTE OF TECHNOLOGY' as a large, bold, prominently styled heading that visually dominates the foreground. It must be the largest text element in the hero, use the gold brand color or a high-contrast highlight treatment (e.g., gold text, gold underline, or a glowing/outlined style), and sit at the very front of the hero layering (highest z-index among hero content). The text size should be significantly larger than the existing tagline and subtitle text.",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-redesign-the-login-page-frontend-src-pages-loginpage-tsx-to-match-the-layout-shown-in-the-uploaded-reference-images-the-page-must-display-a-full-page-library-bookshelf-background-a-dark-semi-transparent-card-with-a-gold-top-border-accent-heading-secure-access-and-subtitle-library-maintenance-system-login-the-card-must-contain-four-fields-in-order-1-select-system-role-a-dropdown-with-placeholder-identify-your-role-and-options-administrator-librarian-faculty-member-student-representative-2-username-unique-id-text-input-with-placeholder-enter-library-id-3-password-password-input-4-batch-year-text-input-e-g-2023-2024-below-the-fields-include-a-remember-me-checkbox-and-forgot-password-link-on-the-same-row-the-primary-action-button-must-be-labeled-authorize-login-below-the-button-add-a-return-to-main-website-link-that-navigates-back-to-the-landing-page-all-interactive-elements-the-button-dropdown-inputs-checkbox-must-use-a-yellow-background-ffd700-or-equivalent-gold-yellow-with-black-text-labels-above-each-field-must-be-uppercase-bold-and-in-yellow-the-card-border-top-accent-must-also-be-yellow-gold",
-      "title": "Redesign the Login page (frontend/src/pages/LoginPage.tsx) to match the layout shown in the uploaded reference images. The page must display a full-page library bookshelf background, a dark semi-transparent card with a gold top border accent, heading 'Secure Access' and subtitle 'Library Maintenance System Login'. The card must contain four fields in order: (1) SELECT SYSTEM ROLE — a dropdown with placeholder 'Identify your role' and options: Administrator, Librarian, Faculty Member, Student Representative; (2) USERNAME / UNIQUE ID — text input with placeholder 'Enter library ID'; (3) PASSWORD — password input; (4) BATCH / YEAR — text input (e.g., '2023–2024'). Below the fields include a 'Remember me' checkbox and 'Forgot Password?' link on the same row. The primary action button must be labeled 'AUTHORIZE LOGIN'. Below the button add a '← Return to Main Website' link that navigates back to the landing page. All interactive elements (the button, dropdown, inputs, checkbox) must use a yellow background (#FFD700 or equivalent gold-yellow) with black text. Labels above each field must be uppercase, bold, and in yellow. The card border-top accent must also be yellow/gold.",
-      "reqIds": [
-        "REQ-11"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-the-login-page-frontend-src-pages-loginpage-tsx-ensure-the-select-system-role-dropdown-s-option-elements-are-styled-with-a-yellow-ffd700-background-and-black-text-so-that-the-options-list-visually-matches-the-yellow-gold-theme-already-applied-to-other-interactive-form-elements-on-the-page",
-      "title": "In the Login page (frontend/src/pages/LoginPage.tsx), ensure the SELECT SYSTEM ROLE dropdown's option elements are styled with a yellow (#FFD700) background and black text, so that the options list visually matches the yellow/gold theme already applied to other interactive form elements on the page.",
-      "reqIds": [
-        "REQ-12"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-the-landing-page-hero-section-frontend-src-pages-landingpage-tsx-add-an-autoplaying-muted-looping-background-video-of-a-library-scene-the-video-element-must-be-absolutely-positioned-to-fill-the-entire-hero-section-w-full-h-full-object-cover-placed-behind-all-hero-content-via-z-index-layering-a-semi-transparent-dark-overlay-must-sit-between-the-video-and-the-hero-text-content-to-preserve-text-readability-the-video-source-should-reference-a-static-asset-at-frontend-public-assets-generated-library-hero-bg-mp4-the-existing-hero-text-cta-buttons-and-other-content-must-remain-fully-visible-and-functional-above-the-video-on-browsers-where-video-cannot-play-the-existing-hero-background-image-should-serve-as-a-fallback",
-      "title": "In the landing page hero section (frontend/src/pages/LandingPage.tsx), add an autoplaying, muted, looping background video of a library scene. The video element must be absolutely positioned to fill the entire hero section (w-full h-full object-cover), placed behind all hero content via z-index layering. A semi-transparent dark overlay must sit between the video and the hero text content to preserve text readability. The video source should reference a static asset at frontend/public/assets/generated/library-hero-bg.mp4. The existing hero text, CTA buttons, and other content must remain fully visible and functional above the video. On browsers where video cannot play, the existing hero background image should serve as a fallback.",
-      "reqIds": [
-        "REQ-13"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-frontend-src-pages-landingpage-tsx-ensure-the-hero-section-contains-an-autoplaying-muted-looping-video-element-that-plays-a-library-scene-video-the-video-element-must-be-absolutely-positioned-to-fill-the-entire-hero-section-w-full-h-full-object-cover-placed-behind-all-hero-content-via-z-index-layering-a-semi-transparent-dark-overlay-must-sit-between-the-video-and-the-hero-text-content-to-preserve-text-readability-the-video-source-must-reference-frontend-public-assets-generated-library-hero-bg-mp4-set-autoplay-muted-loop-and-playsinline-attributes-on-the-video-element-if-the-video-cannot-play-the-existing-hero-background-image-must-serve-as-a-fallback-via-the-video-poster-attribute-all-existing-hero-text-cta-buttons-and-other-content-must-remain-fully-visible-and-functional-above-the-video",
-      "title": "In frontend/src/pages/LandingPage.tsx, ensure the hero section contains an autoplaying, muted, looping <video> element that plays a library scene video. The video element must be absolutely positioned to fill the entire hero section (w-full h-full object-cover), placed behind all hero content via z-index layering. A semi-transparent dark overlay must sit between the video and the hero text content to preserve text readability. The video source must reference frontend/public/assets/generated/library-hero-bg.mp4. Set autoPlay, muted, loop, and playsInline attributes on the video element. If the video cannot play, the existing hero background image must serve as a fallback via the <video> poster attribute. All existing hero text, CTA buttons, and other content must remain fully visible and functional above the video.",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-enforce-that-only-users-with-the-admin-role-can-add-or-upload-books-in-the-backend-backend-main-mo-gate-the-addbook-and-any-editbook-deletebook-functions-so-that-callers-without-the-admin-role-receive-an-error-on-the-frontend-the-add-book-button-and-addbookmodal-in-the-manage-books-tab-frontend-src-components-admin-managebookstab-tsx-and-frontend-src-components-admin-addbookmodal-tsx-must-only-be-rendered-and-accessible-when-the-authenticated-user-has-the-admin-role-non-admin-users-must-not-see-or-be-able-to-reach-the-book-upload-ui",
-      "title": "Enforce that only users with the 'admin' role can add or upload books. In the backend (backend/main.mo), gate the addBook (and any editBook/deleteBook) functions so that callers without the admin role receive an error. On the frontend, the 'Add Book' button and AddBookModal in the Manage Books tab (frontend/src/components/admin/ManageBooksTab.tsx and frontend/src/components/admin/AddBookModal.tsx) must only be rendered and accessible when the authenticated user has the admin role. Non-admin users must not see or be able to reach the book upload UI.",
-      "reqIds": [
-        "REQ-15"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-track-and-display-the-number-of-currently-logged-in-members-active-sessions-on-the-admin-dashboard-in-the-backend-backend-main-mo-maintain-a-record-of-active-login-sessions-increment-on-login-and-decrement-on-logout-and-expose-a-query-function-e-g-getactiveusercount-that-returns-the-current-count-on-the-frontend-add-an-active-members-online-stat-card-to-the-overview-tab-frontend-src-components-admin-overviewtab-tsx-that-fetches-and-displays-this-count-using-the-existing-animated-stat-card-pattern-this-stat-card-must-only-be-visible-to-admin-users",
-      "title": "Track and display the number of currently logged-in members (active sessions) on the Admin Dashboard. In the backend (backend/main.mo), maintain a record of active login sessions — increment on login and decrement on logout — and expose a query function (e.g., getActiveUserCount) that returns the current count. On the frontend, add an 'Active Members Online' stat card to the Overview tab (frontend/src/components/admin/OverviewTab.tsx) that fetches and displays this count using the existing animated stat card pattern. This stat card must only be visible to admin users.",
-      "reqIds": [
-        "REQ-16"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-frontend-src-contexts-authcontext-tsx-persist-the-authenticated-user-s-role-and-principal-to-localstorage-on-login-and-restore-it-on-page-load-refresh-so-that-admin-sessions-survive-page-reloads-on-logout-clear-all-persisted-session-data-from-localstorage-the-restored-session-must-correctly-reflect-the-admin-role-so-that-role-gated-ui-and-routes-remain-accessible-after-a-refresh",
-      "title": "In frontend/src/contexts/AuthContext.tsx, persist the authenticated user's role and principal to localStorage on login and restore it on page load/refresh, so that admin sessions survive page reloads. On logout, clear all persisted session data from localStorage. The restored session must correctly reflect the admin role so that role-gated UI and routes remain accessible after a refresh.",
-      "reqIds": [
-        "REQ-17"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-frontend-src-hooks-usequeries-ts-audit-and-fix-the-usegetuserrole-or-equivalent-query-so-that-it-reliably-fetches-and-returns-the-authenticated-user-s-role-from-the-backend-on-mount-and-after-identity-changes-ensure-the-query-is-not-stale-or-returning-undefined-null-for-admin-users-who-are-already-registered-and-that-it-retries-or-invalidates-correctly-when-the-actor-identity-is-ready",
-      "title": "In frontend/src/hooks/useQueries.ts, audit and fix the useGetUserRole (or equivalent) query so that it reliably fetches and returns the authenticated user's role from the backend on mount and after identity changes. Ensure the query is not stale or returning undefined/null for admin users who are already registered, and that it retries or invalidates correctly when the actor identity is ready.",
-      "reqIds": [
-        "REQ-18"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-frontend-src-components-protectedroute-tsx-fix-the-admin-role-guard-so-that-it-correctly-reads-the-persisted-restored-role-from-authcontext-including-from-localstorage-and-does-not-redirect-admin-users-away-from-the-admin-dashboard-during-the-initial-render-while-role-data-is-still-loading-show-a-loading-state-while-the-role-is-being-determined-rather-than-immediately-redirecting",
-      "title": "In frontend/src/components/ProtectedRoute.tsx, fix the admin role guard so that it correctly reads the persisted/restored role from AuthContext (including from localStorage), and does not redirect admin users away from the admin dashboard during the initial render while role data is still loading. Show a loading state while the role is being determined rather than immediately redirecting.",
-      "reqIds": [
-        "REQ-19"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-frontend-src-pages-loginpage-tsx-after-successful-internet-identity-authentication-ensure-the-login-flow-explicitly-calls-the-backend-to-fetch-the-user-s-role-before-redirecting-if-the-role-is-admin-redirect-to-admin-otherwise-redirect-to-dashboard-store-the-resolved-role-in-authcontext-and-persist-it-to-localstorage-as-part-of-the-login-flow",
-      "title": "In frontend/src/pages/LoginPage.tsx, after successful Internet Identity authentication, ensure the login flow explicitly calls the backend to fetch the user's role before redirecting. If the role is 'admin', redirect to /admin; otherwise redirect to /dashboard. Store the resolved role in AuthContext and persist it to localStorage as part of the login flow.",
-      "reqIds": [
-        "REQ-20"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-frontend-src-components-admin-managebookstab-tsx-and-frontend-src-components-admin-addbookmodal-tsx-ensure-the-add-book-upload-books-button-and-modal-are-conditionally-rendered-only-when-the-authenticated-user-s-role-is-admin-read-the-role-from-authcontext-which-now-includes-the-persisted-value-not-solely-from-a-live-query-that-may-not-have-resolved-yet",
-      "title": "In frontend/src/components/admin/ManageBooksTab.tsx and frontend/src/components/admin/AddBookModal.tsx, ensure the 'Add Book' / 'Upload Books' button and modal are conditionally rendered only when the authenticated user's role is 'admin'. Read the role from AuthContext (which now includes the persisted value), not solely from a live query that may not have resolved yet.",
-      "reqIds": [
-        "REQ-22"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-frontend-src-app-tsx-ensure-the-admin-route-is-wrapped-in-protectedroute-with-a-required-role-of-admin-ensure-the-dashboard-route-is-wrapped-with-a-required-role-of-student-or-at-minimum-requires-authentication-any-unauthenticated-access-to-either-protected-route-must-redirect-to-login",
-      "title": "In frontend/src/App.tsx, ensure the /admin route is wrapped in ProtectedRoute with a required role of 'admin'. Ensure the /dashboard route is wrapped with a required role of 'student' (or at minimum requires authentication). Any unauthenticated access to either protected route must redirect to /login.",
-      "reqIds": [
-        "REQ-24"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-audit-and-fix-all-typescript-compilation-errors-across-the-frontend-codebase-that-contributed-to-the-deployment-failure-check-frontend-src-app-tsx-frontend-src-contexts-authcontext-tsx-frontend-src-hooks-usequeries-ts-frontend-src-components-protectedroute-tsx-frontend-src-pages-loginpage-tsx-frontend-src-pages-admindashboard-tsx-frontend-src-components-admin-overviewtab-tsx-frontend-src-components-admin-managebookstab-tsx-and-frontend-src-components-admin-addbookmodal-tsx-for-type-errors-missing-imports-incorrect-prop-types-and-mismatched-interface-definitions-fix-all-errors-so-the-frontend-builds-without-errors",
-      "title": "Audit and fix all TypeScript compilation errors across the frontend codebase that contributed to the deployment failure. Check frontend/src/App.tsx, frontend/src/contexts/AuthContext.tsx, frontend/src/hooks/useQueries.ts, frontend/src/components/ProtectedRoute.tsx, frontend/src/pages/LoginPage.tsx, frontend/src/pages/AdminDashboard.tsx, frontend/src/components/admin/OverviewTab.tsx, frontend/src/components/admin/ManageBooksTab.tsx, and frontend/src/components/admin/AddBookModal.tsx for type errors, missing imports, incorrect prop types, and mismatched interface definitions. Fix all errors so the frontend builds without errors.",
-      "reqIds": [
-        "REQ-26"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-verify-end-to-end-that-the-admin-session-persistence-works-correctly-after-the-deployment-fix-after-an-admin-user-logs-in-via-internet-identity-1-their-role-must-be-fetched-from-the-backend-and-stored-in-authcontext-and-localstorage-2-on-page-refresh-the-admin-role-must-be-restored-from-localstorage-so-the-admin-dashboard-remains-accessible-without-re-authentication-3-the-protectedroute-for-admin-must-not-redirect-away-during-role-resolution-4-logout-must-clear-all-localstorage-session-data",
-      "title": "Verify end-to-end that the admin session persistence works correctly after the deployment fix. After an admin user logs in via Internet Identity: (1) their role must be fetched from the backend and stored in AuthContext and localStorage; (2) on page refresh, the admin role must be restored from localStorage so the admin dashboard remains accessible without re-authentication; (3) the ProtectedRoute for /admin must not redirect away during role resolution; (4) logout must clear all localStorage session data.",
-      "reqIds": [
-        "REQ-27"
       ],
       "version": 1
     }
@@ -201,113 +44,33 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Landing page with hero section and animated stats",
+      "summary": "Book Catalog feature",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "User authentication with signup and login",
+      "summary": "Student Dashboard feature",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Admin dashboard for managing books and users",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Dark mode support",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Mobile-responsive navigation",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Role-based access control",
+      "summary": "Admin Dashboard feature",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-7",
-      "summary": "Create a backend actor with data models and logic for: (1) Books — fields: id, title, author, category, isbn, totalCopies, availableCopies, description, addedAt; (2) Users — fields: id, name, email, passwordHash, role (student | admin), joinedAt; (3) BorrowRecords — fields: id, userId, bookId, borrowedAt, dueDate, returnedAt (optional). Expose CRUD operations for books and users (admin only), borrow/return book functions, and query functions to list books, users, borrow history, and dashboard stats (total books, total users, books borrowed, overdue count).",
+      "summary": "Ensure all backend actor methods required by the frontend are exposed in `backend/main.mo`. Audit the methods called by `useQueries.ts` (e.g., `getAllBooks`, `getAllUsers`, `getAllBorrowRecords`, `borrowBook`, `returnBook`, `reserveBook`, `cancelReservation`, `approveReservation`, `rejectReservation`, `addBook`, `editBook`, `deleteBook`, `getAllAnnouncements`, `getAllDigitalResources`, etc.) and confirm they are all implemented and publicly accessible in the actor.",
       "reqIds": [
-        "REQ-1"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Highlight 'VEMU INSTITUTE OF TECHNOLOGY' name in large prominent text appearing in the foreground/front of the hero section",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Redesign login form to have: SELECT ROLE (with options: Administrator, Librarian, Faculty Member, Student Representative), USERNAME/UNIQUE ID, PASSWORD, and BATCH/YEAR fields; login button and form elements styled in yellow with black text",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Add background video of a library playing on the landing/starting page hero section",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-11",
-      "summary": "Restrict book upload/add functionality to admin role only; non-admins cannot upload books",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Show number of members currently logged in on the admin dashboard (admin-only stat)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-17",
-      "summary": "In backend/main.mo, verify and fix the getUserRole (or equivalent) query function so it correctly returns the stored role for the calling principal. Ensure that the admin principal (patannoormahammad123@gmail.com's Internet Identity principal) has the admin role persisted in stable storage and is not lost across canister upgrades. If needed, add a bootstrapAdmin function or ensure the admin principal is seeded in the stable user map.",
-      "reqIds": [
-        "REQ-21"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-19",
-      "summary": "In frontend/src/components/admin/OverviewTab.tsx, ensure the 'Active Members Online' stat card correctly fetches and displays the active user count from the backend getActiveUserCount query. The card must only render when the authenticated user has the admin role (sourced from the now-persisted AuthContext role).",
-      "reqIds": [
-        "REQ-23"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-20",
-      "summary": "Audit and fix all compilation errors in backend/main.mo that caused the Version 8 deployment failure. Ensure the Motoko actor compiles cleanly: verify all type definitions (Book, BorrowRecord, UserProfile), role-based access control logic, getActiveUserCount function, getUserRole function, addBook/editBook/deleteBook admin guards, and stable variable declarations are syntactically and semantically correct. Fix any mismatched types, missing imports, undefined identifiers, or invalid pattern matches.",
-      "reqIds": [
-        "REQ-25"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-21",
-      "summary": "Revert the entire application (both frontend and backend) to the state it was in at Version 8, discarding all changes introduced in Version 9. Version 8 is the last known-good state the user approved. Restore all frontend source files, backend Motoko code, and configuration to exactly match Version 8.",
-      "reqIds": [
-        "REQ-28"
+        "REQ-4"
       ],
       "status": "pending"
     }
   ],
   "gameProjectType": "none",
-  "projectName": "VEMU Institute of Technology Library Portal",
+  "projectName": "VEMU Library Portal",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }
