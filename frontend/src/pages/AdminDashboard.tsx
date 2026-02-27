@@ -1,115 +1,141 @@
 import React, { useState } from 'react';
-import {
-  LayoutDashboard, BookOpen, Users, BookMarked, Menu, X, Shield,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useAuth } from '../contexts/AuthContext';
+import { UserRole } from '../backend';
 import OverviewTab from '../components/admin/OverviewTab';
 import ManageBooksTab from '../components/admin/ManageBooksTab';
 import ManageUsersTab from '../components/admin/ManageUsersTab';
 import BorrowRecordsTab from '../components/admin/BorrowRecordsTab';
-import { useGetCallerUserProfile } from '../hooks/useQueries';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import {
+  LayoutDashboard,
+  BookOpen,
+  Users,
+  ClipboardList,
+  Menu,
+  X,
+  ChevronRight,
+} from 'lucide-react';
 
-type Tab = 'overview' | 'books' | 'users' | 'records';
+type TabId = 'overview' | 'books' | 'users' | 'records';
 
-const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
+const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'books', label: 'Manage Books', icon: BookOpen },
   { id: 'users', label: 'Manage Users', icon: Users },
-  { id: 'records', label: 'Borrow Records', icon: BookMarked },
+  { id: 'records', label: 'Borrow Records', icon: ClipboardList },
 ];
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const { userRole, isRoleLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { data: profile } = useGetCallerUserProfile();
 
-  const ActiveComponent = {
-    overview: OverviewTab,
-    books: ManageBooksTab,
-    users: ManageUsersTab,
-    records: BorrowRecordsTab,
-  }[activeTab];
+  if (isRoleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">Loading dashboard…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (userRole !== UserRole.admin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <p className="text-destructive font-semibold text-lg">Access Denied</p>
+          <p className="text-muted-foreground text-sm mt-1">You do not have admin privileges.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const renderTab = () => {
+    switch (activeTab) {
+      case 'overview': return <OverviewTab />;
+      case 'books': return <ManageBooksTab />;
+      case 'users': return <ManageUsersTab />;
+      case 'records': return <BorrowRecordsTab />;
+    }
+  };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex bg-background">
-      {/* Sidebar Overlay (mobile) */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <div className="min-h-screen flex flex-col bg-background">
+      <Navbar />
 
-      {/* Sidebar */}
-      <aside className={`
-        fixed lg:static inset-y-0 left-0 z-40 w-64 bg-sidebar text-sidebar-foreground
-        flex flex-col transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        top-16 lg:top-0
-      `}>
-        {/* Sidebar Header */}
-        <div className="p-5 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gold/20 border border-gold/40 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-gold" />
-            </div>
-            <div>
-              <p className="text-xs text-sidebar-foreground/60">Admin Panel</p>
-              <p className="text-sm font-semibold text-sidebar-foreground truncate max-w-[130px]">
-                {profile?.name || 'Administrator'}
-              </p>
-            </div>
+      <div className="flex flex-1">
+        {/* Mobile overlay */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar */}
+        <aside
+          className={`
+            fixed top-0 left-0 h-full w-64 bg-card border-r border-border z-30 pt-16
+            transform transition-transform duration-200
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            lg:relative lg:translate-x-0 lg:pt-0 lg:z-auto lg:flex lg:flex-col
+          `}
+        >
+          <div className="p-4 border-b border-border">
+            <h2 className="font-heading font-bold text-foreground text-sm uppercase tracking-wider">
+              Admin Panel
+            </h2>
           </div>
-        </div>
+          <nav className="flex-1 p-3 flex flex-col gap-1">
+            {tabs.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => {
+                  setActiveTab(id);
+                  setSidebarOpen(false);
+                }}
+                className={`
+                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
+                  transition-colors text-left
+                  ${activeTab === id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }
+                `}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="flex-1">{label}</span>
+                {activeTab === id && <ChevronRight className="w-3 h-3" />}
+              </button>
+            ))}
+          </nav>
+        </aside>
 
-        {/* Nav */}
-        <nav className="flex-1 p-3 space-y-1">
-          {tabs.map(({ id, label, icon: Icon }) => (
+        {/* Main content */}
+        <main className="flex-1 flex flex-col min-w-0">
+          {/* Mobile header */}
+          <div className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
             <button
-              key={id}
-              onClick={() => { setActiveTab(id); setSidebarOpen(false); }}
-              className={`
-                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
-                transition-all duration-200
-                ${activeTab === id
-                  ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                }
-              `}
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-lg hover:bg-muted transition-colors"
             >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              {label}
+              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-          ))}
-        </nav>
+            <h1 className="font-heading font-bold text-foreground">
+              {tabs.find((t) => t.id === activeTab)?.label}
+            </h1>
+          </div>
 
-        <div className="p-4 border-t border-sidebar-border">
-          <p className="text-xs text-sidebar-foreground/40 text-center">VEMU Library Admin</p>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile Header */}
-        <div className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="w-8 h-8"
-          >
-            {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-          </Button>
-          <span className="font-heading font-semibold text-sm">
-            {tabs.find(t => t.id === activeTab)?.label}
-          </span>
-        </div>
-
-        {/* Content */}
-        <main className="flex-1 p-4 lg:p-8 overflow-auto">
-          <ActiveComponent />
+          <div className="flex-1 p-4 lg:p-6 overflow-auto">
+            {renderTab()}
+          </div>
         </main>
       </div>
+
+      <Footer />
     </div>
   );
 }

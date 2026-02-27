@@ -1,24 +1,167 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Ensure autoplay library background video on landing page",
+  "title": "Revert to Version 8",
   "requirements": [
     {
-      "id": "REQ-14",
-      "summary": "Add autoplaying background video to landing page hero section with proper layering and fallback",
+      "id": "REQ-28",
+      "summary": "Revert all frontend source files, components, pages, hooks, contexts, and configuration to their exact state at Version 8, discarding all Version 9 changes",
       "acceptanceCriteria": [
-        "Opening the landing page immediately begins playing a library video in the hero section background without requiring user interaction.",
-        "The video plays automatically, is muted, loops continuously, and fills the full hero section with object-cover sizing.",
-        "The video is layered behind all hero text and CTA buttons, which remain readable and clickable.",
-        "A semi-transparent dark overlay is visible between the video and the hero content.",
-        "The video source path is frontend/public/assets/generated/library-hero-bg.mp4.",
-        "On browsers where autoplay is blocked or the video fails to load, the hero background image is shown as a fallback."
+        "The deployed application matches the state and behavior of Version 8.",
+        "All Version 9 changes are fully reverted.",
+        "The application builds and deploys without errors.",
+        "All features present in Version 8 are functional after the revert."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore the exact routing configuration, component structure, and provider setup that existed in Version 8"
+        },
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore the application entry point setup including all providers and initialization logic as they were in Version 8"
+        },
+        {
           "path": "frontend/src/pages/LandingPage.tsx",
           "operation": "modify",
-          "description": "Modify the hero section to include an autoplaying background video element. Add a <video> element with autoPlay, muted, loop, and playsInline attributes, sourcing frontend/public/assets/generated/library-hero-bg.mp4. Position the video absolutely to fill the hero section (w-full h-full object-cover) and layer it behind all hero content using z-index. Add a semi-transparent dark overlay div between the video and the hero text content to ensure readability. Set the poster attribute on the video to reference the existing hero background image as a fallback. Ensure all existing hero text, CTA buttons, and navigation remain fully visible and functional above the video layer."
+          "description": "Revert to Version 8 state: restore the landing page hero section, statistics display, and feature grid to match Version 8 exactly"
+        },
+        {
+          "path": "frontend/src/pages/LoginPage.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore the login page authentication flow, role fetching logic, and redirect behavior as implemented in Version 8"
+        },
+        {
+          "path": "frontend/src/pages/SignUpPage.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore the sign-up page Internet Identity integration and post-authentication flow to Version 8"
+        },
+        {
+          "path": "frontend/src/pages/StudentDashboard.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore the student dashboard layout, tab structure, and catalog/borrowed books views to their Version 8 implementation"
+        },
+        {
+          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore the admin dashboard sidebar, tab navigation, and overall structure as they existed in Version 8"
+        },
+        {
+          "path": "frontend/src/components/Navbar.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore navigation bar role-aware links, theme toggle, authentication controls, and mobile menu to Version 8"
+        },
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore footer branding, links, contact info, and copyright line to match Version 8"
+        },
+        {
+          "path": "frontend/src/components/BookCatalog.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore book catalog search, filtering, grid display, and borrow functionality to Version 8 implementation"
+        },
+        {
+          "path": "frontend/src/components/BorrowedBooksList.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore borrowed books list tabs, overdue indicators, and return book action to Version 8"
+        },
+        {
+          "path": "frontend/src/components/ProfileSetupModal.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore profile setup modal user data collection and save logic to Version 8"
+        },
+        {
+          "path": "frontend/src/components/ThemeToggle.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore theme toggle button and switching logic to Version 8"
+        },
+        {
+          "path": "frontend/src/components/ProtectedRoute.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore route guard authentication checks and role-based access control to Version 8 implementation"
+        },
+        {
+          "path": "frontend/src/components/AnimatedCounter.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore animated counter component animation logic to Version 8"
+        },
+        {
+          "path": "frontend/src/components/admin/OverviewTab.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore admin overview tab stat cards and active members counter to Version 8"
+        },
+        {
+          "path": "frontend/src/components/admin/ManageBooksTab.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore admin books management table, search, delete functionality, and add book modal integration to Version 8"
+        },
+        {
+          "path": "frontend/src/components/admin/ManageUsersTab.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore admin users management table, search, and user display to Version 8"
+        },
+        {
+          "path": "frontend/src/components/admin/BorrowRecordsTab.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore admin borrow records table, filtering, search, and status display to Version 8"
+        },
+        {
+          "path": "frontend/src/components/admin/AddBookModal.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore add book modal form fields, validation, and mutation logic to Version 8"
+        },
+        {
+          "path": "frontend/src/hooks/useInternetIdentity.ts",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore Internet Identity authentication hook context, login/logout logic, and identity persistence to Version 8"
+        },
+        {
+          "path": "frontend/src/hooks/useActor.ts",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore backend actor creation, caching, initialization, and query invalidation logic to Version 8"
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore all TanStack Query hooks for backend interactions including profile, roles, books CRUD, and borrow/return operations to Version 8"
+        },
+        {
+          "path": "frontend/src/contexts/AuthContext.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore authentication context managing user role and principal state with localStorage persistence to Version 8"
+        },
+        {
+          "path": "frontend/src/contexts/ThemeContext.tsx",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore theme context managing light/dark mode with localStorage persistence to Version 8"
+        },
+        {
+          "path": "frontend/src/utils/urlParams.ts",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore URL parameter utility functions for reading, storing, and clearing query and hash parameters to Version 8"
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore global stylesheet with font imports, Tailwind setup, and CSS custom properties for color tokens to Version 8"
+        },
+        {
+          "path": "frontend/index.css",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore Tailwind CSS entry file OKLCH-based custom property tokens for themes to Version 8"
+        },
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore HTML entry point structure and script loading to Version 8"
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Revert to Version 8 state: restore Tailwind configuration including fonts, color tokens, border radii, shadows, and animations to Version 8"
         }
       ]
     }

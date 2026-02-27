@@ -1,34 +1,59 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T00:05:10.604Z",
+  "generatedAt": "2026-02-26T00:53:11.204Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 1,
-    "implemented": 1,
+    "implemented": 0,
     "items": [
       {
-        "id": "REQ-14",
-        "summary": "In frontend/src/pages/LandingPage.tsx, ensure the hero section contains an autoplaying, muted, looping <video> element that plays a library scene video. The video element must be absolutely positioned to fill the entire hero section (w-full h-full object-cover), placed behind all hero content via z-index layering. A semi-transparent dark overlay must sit between the video and the hero text content to preserve text readability. The video source must reference frontend/public/assets/generated/library-hero-bg.mp4. Set autoPlay, muted, loop, and playsInline attributes on the video element. If the video cannot play, the existing hero background image must serve as a fallback via the <video> poster attribute. All existing hero text, CTA buttons, and other content must remain fully visible and functional above the video.",
-        "status": "implemented",
+        "id": "REQ-28",
+        "summary": "Revert the entire application (both frontend and backend) to the state it was in at Version 8, discarding all changes introduced in Version 9. Version 8 is the last known-good state the user approved. Restore all frontend source files, backend Motoko code, and configuration to exactly match Version 8.",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/pages/LandingPage.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/main.tsx",
+          "frontend/src/pages/LandingPage.tsx",
+          "frontend/src/pages/LoginPage.tsx",
+          "frontend/src/pages/SignUpPage.tsx",
+          "frontend/src/pages/StudentDashboard.tsx",
+          "frontend/src/pages/AdminDashboard.tsx",
+          "frontend/src/components/Navbar.tsx",
+          "frontend/src/components/Footer.tsx",
+          "frontend/src/components/BookCatalog.tsx",
+          "frontend/src/components/BorrowedBooksList.tsx",
+          "frontend/src/components/ProfileSetupModal.tsx",
+          "frontend/src/components/ThemeToggle.tsx",
+          "frontend/src/components/ProtectedRoute.tsx",
+          "frontend/src/components/AnimatedCounter.tsx",
+          "frontend/src/components/admin/OverviewTab.tsx",
+          "frontend/src/components/admin/ManageBooksTab.tsx",
+          "frontend/src/components/admin/ManageUsersTab.tsx",
+          "frontend/src/components/admin/BorrowRecordsTab.tsx",
+          "frontend/src/components/admin/AddBookModal.tsx",
+          "frontend/src/hooks/useInternetIdentity.ts",
+          "frontend/src/hooks/useActor.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/contexts/AuthContext.tsx",
+          "frontend/src/contexts/ThemeContext.tsx",
+          "frontend/src/utils/urlParams.ts",
+          "frontend/src/index.css",
+          "frontend/index.css",
+          "frontend/index.html",
+          "frontend/tailwind.config.js"
         ],
-        "matchedFiles": [
-          "frontend/src/pages/LandingPage.tsx"
-        ]
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
     "build-request.json",
     "feature_evidence.json",
-    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/pages/LandingPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

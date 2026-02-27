@@ -1,37 +1,118 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useQueryClient } from '@tanstack/react-query';
+import { useActor } from '../hooks/useActor';
+import { UserRole } from '../backend';
 
-interface AuthContextType {
-  isAuthenticated: boolean;
-  isInitializing: boolean;
-  login: () => void;
+interface AuthContextValue {
+  userRole: UserRole | null;
+  isRoleLoading: boolean;
+  setUserRole: (role: UserRole | null) => void;
+  persistedPrincipal: string | null;
   logout: () => void;
-  isLoggingIn: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextValue>({
+  userRole: null,
+  isRoleLoading: true,
+  setUserRole: () => {},
+  persistedPrincipal: null,
+  logout: () => {},
+});
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+const ROLE_KEY = 'userRole';
+const PRINCIPAL_KEY = 'persistedPrincipal';
+
+function getStoredRole(): UserRole | null {
+  try {
+    const stored = localStorage.getItem(ROLE_KEY);
+    if (stored === UserRole.admin || stored === UserRole.user || stored === UserRole.guest) {
+      return stored as UserRole;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+function getStoredPrincipal(): string | null {
+  try {
+    return localStorage.getItem(PRINCIPAL_KEY);
+  } catch {
+    return null;
+  }
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { identity, login, clear, isInitializing, isLoggingIn } = useInternetIdentity();
-  const queryClient = useQueryClient();
+  const { identity, clear } = useInternetIdentity();
+  const { actor, isFetching: actorFetching } = useActor();
 
-  const isAuthenticated = !!identity;
+  const [userRole, setUserRoleState] = useState<UserRole | null>(getStoredRole);
+  const [persistedPrincipal, setPersistedPrincipal] = useState<string | null>(getStoredPrincipal);
+  const [isRoleLoading, setIsRoleLoading] = useState<boolean>(true);
 
-  const logout = async () => {
+  const setUserRole = useCallback((role: UserRole | null) => {
+    setUserRoleState(role);
+    if (role !== null) {
+      try { localStorage.setItem(ROLE_KEY, role); } catch { /* ignore */ }
+    } else {
+      try { localStorage.removeItem(ROLE_KEY); } catch { /* ignore */ }
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    try { localStorage.removeItem(ROLE_KEY); } catch { /* ignore */ }
+    try { localStorage.removeItem(PRINCIPAL_KEY); } catch { /* ignore */ }
+    setUserRoleState(null);
+    setPersistedPrincipal(null);
     await clear();
-    queryClient.clear();
-  };
+  }, [clear]);
+
+  // When identity changes, fetch role from backend
+  useEffect(() => {
+    if (!identity) {
+      // Not logged in — clear role but keep loading false
+      setIsRoleLoading(false);
+      return;
+    }
+
+    const principal = identity.getPrincipal().toString();
+    setPersistedPrincipal(principal);
+    try { localStorage.setItem(PRINCIPAL_KEY, principal); } catch { /* ignore */ }
+
+    if (actorFetching || !actor) {
+      // Actor not ready yet — keep loading
+      setIsRoleLoading(true);
+      return;
+    }
+
+    setIsRoleLoading(true);
+    actor.getUserRole()
+      .then((role) => {
+        setUserRole(role as UserRole);
+        setIsRoleLoading(false);
+      })
+      .catch(() => {
+        // Fall back to stored role if fetch fails
+        const stored = getStoredRole();
+        if (stored) setUserRoleState(stored);
+        setIsRoleLoading(false);
+      });
+  }, [identity, actor, actorFetching, setUserRole]);
+
+  // If no identity, ensure loading is false
+  useEffect(() => {
+    if (!identity && !actorFetching) {
+      setIsRoleLoading(false);
+    }
+  }, [identity, actorFetching]);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isInitializing, login, logout, isLoggingIn }}>
+    <AuthContext.Provider value={{ userRole, isRoleLoading, setUserRole, persistedPrincipal, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
-  return ctx;
 }

@@ -132,6 +132,10 @@ export interface backendInterface {
     addBook(bookCreateData: BookCreateData): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     borrowBook(bookId: string): Promise<void>;
+    decrementActiveUsers(): Promise<void>;
+    deleteBook(bookId: string): Promise<void>;
+    editBook(bookId: string, bookCreateData: BookCreateData): Promise<void>;
+    getActiveUserCount(): Promise<bigint>;
     getAllBooksSortedByTitle(): Promise<Array<Book>>;
     getAllBorrowRecords(): Promise<Array<[Principal, Array<BorrowRecord>]>>;
     getAllUsers(): Promise<Array<[Principal, UserProfile]>>;
@@ -146,6 +150,15 @@ export interface backendInterface {
     }>;
     getMyBorrowHistory(): Promise<Array<BorrowRecord>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getUserRole(): Promise<UserRole>;
+    incrementActiveUsers(): Promise<void>;
+    /**
+     * / Bootstrap function: sets the caller as the initial admin.
+     * / This delegates entirely to AccessControl.initialize which handles
+     * / the bootstrapping logic (can only be called once / by the right principal).
+     * / No admin pre-check here — that would create a chicken-and-egg problem.
+     */
+    initialize(adminToken: string, userProvidedToken: string): Promise<void>;
     isCallerAdmin(): Promise<boolean>;
     returnBook(bookId: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
@@ -206,6 +219,62 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.borrowBook(arg0);
+            return result;
+        }
+    }
+    async decrementActiveUsers(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.decrementActiveUsers();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.decrementActiveUsers();
+            return result;
+        }
+    }
+    async deleteBook(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteBook(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteBook(arg0);
+            return result;
+        }
+    }
+    async editBook(arg0: string, arg1: BookCreateData): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.editBook(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.editBook(arg0, arg1);
+            return result;
+        }
+    }
+    async getActiveUserCount(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getActiveUserCount();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getActiveUserCount();
             return result;
         }
     }
@@ -338,6 +407,48 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getUserProfile(arg0);
             return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getUserRole(): Promise<UserRole> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getUserRole();
+                return from_candid_UserRole_n10(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getUserRole();
+            return from_candid_UserRole_n10(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async incrementActiveUsers(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.incrementActiveUsers();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.incrementActiveUsers();
+            return result;
+        }
+    }
+    async initialize(arg0: string, arg1: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.initialize(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.initialize(arg0, arg1);
+            return result;
         }
     }
     async isCallerAdmin(): Promise<boolean> {

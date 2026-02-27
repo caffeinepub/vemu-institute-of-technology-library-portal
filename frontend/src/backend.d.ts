@@ -49,6 +49,10 @@ export interface backendInterface {
     addBook(bookCreateData: BookCreateData): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     borrowBook(bookId: string): Promise<void>;
+    decrementActiveUsers(): Promise<void>;
+    deleteBook(bookId: string): Promise<void>;
+    editBook(bookId: string, bookCreateData: BookCreateData): Promise<void>;
+    getActiveUserCount(): Promise<bigint>;
     getAllBooksSortedByTitle(): Promise<Array<Book>>;
     getAllBorrowRecords(): Promise<Array<[Principal, Array<BorrowRecord>]>>;
     getAllUsers(): Promise<Array<[Principal, UserProfile]>>;
@@ -63,6 +67,15 @@ export interface backendInterface {
     }>;
     getMyBorrowHistory(): Promise<Array<BorrowRecord>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getUserRole(): Promise<UserRole>;
+    incrementActiveUsers(): Promise<void>;
+    /**
+     * / Bootstrap function: sets the caller as the initial admin.
+     * / This delegates entirely to AccessControl.initialize which handles
+     * / the bootstrapping logic (can only be called once / by the right principal).
+     * / No admin pre-check here — that would create a chicken-and-egg problem.
+     */
+    initialize(adminToken: string, userProvidedToken: string): Promise<void>;
     isCallerAdmin(): Promise<boolean>;
     returnBook(bookId: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;

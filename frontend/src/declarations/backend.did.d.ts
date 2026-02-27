@@ -51,6 +51,10 @@ export interface _SERVICE {
   'addBook' : ActorMethod<[BookCreateData], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'borrowBook' : ActorMethod<[string], undefined>,
+  'decrementActiveUsers' : ActorMethod<[], undefined>,
+  'deleteBook' : ActorMethod<[string], undefined>,
+  'editBook' : ActorMethod<[string, BookCreateData], undefined>,
+  'getActiveUserCount' : ActorMethod<[], bigint>,
   'getAllBooksSortedByTitle' : ActorMethod<[], Array<Book>>,
   'getAllBorrowRecords' : ActorMethod<
     [],
@@ -71,6 +75,15 @@ export interface _SERVICE {
   >,
   'getMyBorrowHistory' : ActorMethod<[], Array<BorrowRecord>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getUserRole' : ActorMethod<[], UserRole>,
+  'incrementActiveUsers' : ActorMethod<[], undefined>,
+  /**
+   * / Bootstrap function: sets the caller as the initial admin.
+   * / This delegates entirely to AccessControl.initialize which handles
+   * / the bootstrapping logic (can only be called once / by the right principal).
+   * / No admin pre-check here — that would create a chicken-and-egg problem.
+   */
+  'initialize' : ActorMethod<[string, string], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'returnBook' : ActorMethod<[string], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,

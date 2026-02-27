@@ -1,64 +1,47 @@
 import React from 'react';
 import { Navigate } from '@tanstack/react-router';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useGetCallerRole, useGetCallerUserProfile } from '../hooks/useQueries';
-import { useActor } from '../hooks/useActor';
-import { Loader2, Lock } from 'lucide-react';
-import ProfileSetupModal from './ProfileSetupModal';
+import { useAuth } from '../contexts/AuthContext';
+import { UserRole } from '../backend';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'admin' | 'user';
+  requiredRole?: UserRole;
 }
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { identity, isInitializing } = useInternetIdentity();
-  const { isFetching: actorFetching } = useActor();
+  const { userRole, isRoleLoading } = useAuth();
+
   const isAuthenticated = !!identity;
 
-  const { data: role, isLoading: roleLoading } = useGetCallerRole();
-  const { data: userProfile, isLoading: profileLoading, isFetched: profileFetched } = useGetCallerUserProfile();
-
-  const isLoading = isInitializing || actorFetching || roleLoading;
-
-  if (isLoading) {
+  // Show spinner while II is initializing or role is being resolved
+  if (isInitializing || (isAuthenticated && isRoleLoading)) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <Loader2 className="w-8 h-8 animate-spin text-navy dark:text-gold mx-auto" />
-          <p className="text-muted-foreground text-sm">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">Loading session…</p>
         </div>
       </div>
     );
   }
 
+  // Not authenticated → send to login
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
 
-  if (requiredRole === 'admin' && role !== 'admin') {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
-        <div className="text-center space-y-4 max-w-sm">
-          <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
-            <Lock className="w-8 h-8 text-destructive" />
-          </div>
-          <h2 className="font-heading text-xl font-bold">Access Denied</h2>
-          <p className="text-muted-foreground text-sm">
-            You don't have permission to access the admin dashboard.
-          </p>
-          <Navigate to="/dashboard" />
-        </div>
-      </div>
-    );
+  // Role-gated route: wait until role is resolved, then check
+  if (requiredRole) {
+    if (userRole !== requiredRole) {
+      // Non-admin trying to access /admin → send to dashboard
+      if (requiredRole === UserRole.admin) {
+        return <Navigate to="/dashboard" />;
+      }
+      return <Navigate to="/login" />;
+    }
   }
 
-  const showProfileSetup = isAuthenticated && !profileLoading && profileFetched && userProfile === null;
-
-  return (
-    <>
-      <ProfileSetupModal open={showProfileSetup} />
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }

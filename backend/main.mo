@@ -6,6 +6,7 @@ import Text "mo:core/Text";
 import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import Principal "mo:core/Principal";
+
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
@@ -46,24 +47,30 @@ actor {
     joinedAt : Time.Time;
   };
 
-  module Book {
-    public func compareByTitle(book1 : Book, book2 : Book) : Order.Order {
-      Text.compare(book1.title, book2.title);
-    };
+  func compareBooksByTitle(book1 : Book, book2 : Book) : Order.Order {
+    Text.compare(book1.title, book2.title);
   };
 
   let bookRecords = Map.empty<Principal, Map.Map<Text, BorrowRecord>>();
-
-  // Books state
   let books = Map.empty<Text, Book>();
-
-  // User profiles state
   let userProfiles = Map.empty<Principal, UserProfile>();
+
+  var activeUsersCount = 0;
 
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  // ── User Profile Functions ──────────────────────────────────────────────────
+  /// Bootstrap function: sets the caller as the initial admin.
+  /// This delegates entirely to AccessControl.initialize which handles
+  /// the bootstrapping logic (can only be called once / by the right principal).
+  /// No admin pre-check here — that would create a chicken-and-egg problem.
+  public shared ({ caller }) func initialize(adminToken : Text, userProvidedToken : Text) : async () {
+    AccessControl.initialize(accessControlState, caller, adminToken, userProvidedToken);
+  };
+
+  public query ({ caller }) func getUserRole() : async AccessControl.UserRole {
+    AccessControl.getUserRole(accessControlState, caller);
+  };
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
@@ -86,10 +93,8 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  // ── Book Functions ──────────────────────────────────────────────────────────
-
   public query ({ caller }) func getAllBooksSortedByTitle() : async [Book] {
-    books.values().toArray().sort(Book.compareByTitle);
+    books.values().toArray().sort(compareBooksByTitle);
   };
 
   public query ({ caller }) func getBookById(id : Text) : async Book {
@@ -127,8 +132,47 @@ actor {
     books.add(bookId, newBook);
   };
 
+  public shared ({ caller }) func editBook(bookId : Text, bookCreateData : BookCreateData) : async () {
+    // Only allow admins to edit books
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can edit books");
+    };
+
+    switch (books.get(bookId)) {
+      case (null) { Runtime.trap("Book not found") };
+      case (?book) {
+        let updatedBook : Book = {
+          id = book.id;
+          title = bookCreateData.title;
+          author = bookCreateData.author;
+          category = bookCreateData.category;
+          isbn = bookCreateData.isbn;
+          totalCopies = bookCreateData.totalCopies;
+          availableCopies = book.availableCopies;
+          description = bookCreateData.description;
+          addedAt = book.addedAt;
+        };
+        books.add(bookId, updatedBook);
+      };
+    };
+  };
+
+  public shared ({ caller }) func deleteBook(bookId : Text) : async () {
+    // Only allow admins to delete books
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can delete books");
+    };
+
+    switch (books.get(bookId)) {
+      case (null) { Runtime.trap("Book not found") };
+      case (?_) {
+        books.remove(bookId);
+      };
+    };
+  };
+
   public shared ({ caller }) func borrowBook(bookId : Text) : async () {
-    // Only authenticated users (not guests) can borrow books
+    // Only allow users to borrow books
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only registered users can borrow books");
     };
@@ -178,7 +222,7 @@ actor {
   };
 
   public shared ({ caller }) func returnBook(bookId : Text) : async () {
-    // Only authenticated users (not guests) can return books
+    // Only allow users to return books
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only registered users can return books");
     };
@@ -222,10 +266,8 @@ actor {
     };
   };
 
-  // ── Query Functions ─────────────────────────────────────────────────────────
-
   public query ({ caller }) func getMyBorrowHistory() : async [BorrowRecord] {
-    // Only authenticated users can view their borrow history
+    // Only allow users to view their borrow history
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only registered users can view borrow history");
     };
@@ -236,11 +278,11 @@ actor {
   };
 
   public query ({ caller }) func getAllBorrowRecords() : async [(Principal, [BorrowRecord])] {
-    // Only admins can view all borrow records
+    // Only allow admins to view all borrow records
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view all borrow records");
     };
-    bookRecords.entries().toArray().map(
+    bookRecords.entries().toArray().map<(Principal, Map.Map<Text, BorrowRecord>), (Principal, [BorrowRecord])>(
       func((principal, recordMap)) : (Principal, [BorrowRecord]) {
         (principal, recordMap.values().toArray());
       }
@@ -253,7 +295,7 @@ actor {
     booksBorrowed : Nat;
     overdueCount : Nat;
   } {
-    // Only admins can view dashboard stats
+    // Only allow admins to view dashboard stats
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view dashboard stats");
     };
@@ -285,10 +327,36 @@ actor {
   };
 
   public query ({ caller }) func getAllUsers() : async [(Principal, UserProfile)] {
-    // Only admins can list all users
+    // Only allow admins to list all users
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can list all users");
     };
     userProfiles.entries().toArray();
+  };
+
+  public query ({ caller }) func getActiveUserCount() : async Nat {
+    // Only allow admins to get active user count
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view active user count");
+    };
+    activeUsersCount;
+  };
+
+  public shared ({ caller }) func incrementActiveUsers() : async () {
+    // Only allow users to register as active
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only registered users can register an active session");
+    };
+    activeUsersCount += 1;
+  };
+
+  public shared ({ caller }) func decrementActiveUsers() : async () {
+    // Only allow users to deregister an active session
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only registered users can deregister an active session");
+    };
+    if (activeUsersCount > 0) {
+      activeUsersCount -= 1;
+    };
   };
 };

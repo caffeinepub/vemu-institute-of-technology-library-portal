@@ -1,24 +1,4 @@
 {
   "kind": "feature_evidence_report",
-  "features": [
-    {
-      "featureId": "feature-in-frontend-src-pages-landingpage-tsx-ensure-the-hero-section-contains-an-autoplaying-muted-looping-video-element-that-plays-a-library-scene-video-the-video-element-must-be-absolutely-positioned-to-fill-the-entire-hero-section-w-full-h-full-object-cover-placed-behind-all-hero-content-via-z-index-layering-a-semi-transparent-dark-overlay-must-sit-between-the-video-and-the-hero-text-content-to-preserve-text-readability-the-video-source-must-reference-frontend-public-assets-generated-library-hero-bg-mp4-set-autoplay-muted-loop-and-playsinline-attributes-on-the-video-element-if-the-video-cannot-play-the-existing-hero-background-image-must-serve-as-a-fallback-via-the-video-poster-attribute-all-existing-hero-text-cta-buttons-and-other-content-must-remain-fully-visible-and-functional-above-the-video",
-      "featureTitle": "In frontend/src/pages/LandingPage.tsx, ensure the hero section contains an autoplaying, muted, looping <video> element that plays a library scene video. The video element must be absolutely positioned to fill the entire hero section (w-full h-full object-cover), placed behind all hero content via z-index layering. A semi-transparent dark overlay must sit between the video and the hero text content to preserve text readability. The video source must reference frontend/public/assets/generated/library-hero-bg.mp4. Set autoPlay, muted, loop, and playsInline attributes on the video element. If the video cannot play, the existing hero background image must serve as a fallback via the <video> poster attribute. All existing hero text, CTA buttons, and other content must remain fully visible and functional above the video.",
-      "files": [
-        "frontend/src/pages/LandingPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-14"
-      ],
-      "confidence": "high"
-    }
-  ]
+  "features": []
 }
