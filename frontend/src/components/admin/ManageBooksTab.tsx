@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { Plus, Trash2, Search, Pencil, BookOpen, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useGetAllBooks, useDeleteBook } from '../../hooks/useQueries';
-import { AuthContext } from '../../contexts/AuthContext';
 import AddBookModal from './AddBookModal';
 import { toast } from 'sonner';
 import type { Book } from '../../backend';
@@ -34,7 +33,6 @@ export default function ManageBooksTab() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
 
-  const { userRole } = useContext(AuthContext);
   const { data: books = [], isLoading } = useGetAllBooks();
   const deleteMutation = useDeleteBook();
 
@@ -68,12 +66,13 @@ export default function ManageBooksTab() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        {userRole === 'admin' && (
-          <Button onClick={() => setShowAddModal(true)} className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Add Book
-          </Button>
-        )}
+        <Button
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-2 shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          Add Book
+        </Button>
       </div>
 
       {/* Table */}
@@ -88,8 +87,19 @@ export default function ManageBooksTab() {
           <BookOpen className="w-12 h-12 text-muted-foreground mb-4" />
           <p className="text-lg font-semibold">No books found</p>
           <p className="text-sm text-muted-foreground mt-1">
-            {books.length === 0 ? 'Add your first book to get started' : 'Try a different search'}
+            {books.length === 0
+              ? 'Add your first book to get started'
+              : 'Try a different search'}
           </p>
+          {books.length === 0 && (
+            <Button
+              onClick={() => setShowAddModal(true)}
+              className="mt-4 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add First Book
+            </Button>
+          )}
         </div>
       ) : (
         <div className="rounded-lg border border-border overflow-hidden">
@@ -101,7 +111,7 @@ export default function ManageBooksTab() {
                 <TableHead>Category</TableHead>
                 <TableHead>ISBN</TableHead>
                 <TableHead>Copies</TableHead>
-                {userRole === 'admin' && <TableHead className="w-24">Actions</TableHead>}
+                <TableHead className="w-24">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -134,54 +144,52 @@ export default function ManageBooksTab() {
                         {available}/{total}
                       </span>
                     </TableCell>
-                    {userRole === 'admin' && (
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8"
-                            onClick={() => setEditingBook(book)}
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8 text-destructive hover:text-destructive"
-                                disabled={isDeleting}
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={() => setEditingBook(book)}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              disabled={isDeleting}
+                            >
+                              {isDeleting ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-3.5 h-3.5" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Book</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{book.title}"? This action
+                                cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(book.id, book.title)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
-                                {isDeleting ? (
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                ) : (
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                )}
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Book</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete "{book.title}"? This action
-                                  cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDelete(book.id, book.title)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
-                    )}
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 );
               })}
@@ -191,11 +199,15 @@ export default function ManageBooksTab() {
       )}
 
       {/* Add Book Modal */}
-      {showAddModal && <AddBookModal onClose={() => setShowAddModal(false)} />}
+      <AddBookModal
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+      />
 
       {/* Edit Book Modal */}
       {editingBook && (
         <AddBookModal
+          open={true}
           onClose={() => setEditingBook(null)}
           editBook={editingBook}
         />

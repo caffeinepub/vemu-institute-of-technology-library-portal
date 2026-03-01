@@ -1,129 +1,78 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix missing features — Book Catalog empty, Student/Admin Dashboard not rendering data",
+  "title": "Fix Add Book & Manage Users buttons, and add book file upload for admins",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Fix Book Catalog data fetching and rendering so books are displayed correctly",
+      "summary": "Fix the Add Book button in ManageBooksTab so clicking it reliably opens the AddBookModal with all interactive form fields, proper submission flow, and modal close on success",
       "acceptanceCriteria": [
-        "Books stored in the backend canister are returned by the `getAllBooks` query",
-        "The Book Catalog on the Student Dashboard shows the correct book count (e.g., 'Showing X of Y books')",
-        "Individual book cards are rendered with title, author, category, and borrow/reserve actions",
-        "Search and category filter controls produce correct filtered results"
+        "Clicking 'Add Book' in ManageBooksTab opens the AddBookModal without errors.",
+        "All form fields in AddBookModal are editable and validated before submission.",
+        "Submitting the form calls the backend add-book mutation and the book list refreshes on success.",
+        "The modal closes after a successful add and shows an error message on failure."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/admin/ManageBooksTab.tsx",
           "operation": "modify",
-          "description": "Fix the useGetAllBooks hook to correctly call the backend actor method `getAllBooksSortedByTitle` instead of `getAllBooks`. Ensure the query is enabled only when the actor is available and not fetching. Verify the component's usage instructions before implementing."
+          "description": "Fix the Add Book button onClick handler to correctly set the isAddModalOpen state to true. Ensure the button is not disabled and that the modal state management is properly wired. Verify the AddBookModal component is correctly imported and rendered with the open prop bound to isAddModalOpen and onOpenChange bound to setIsAddModalOpen."
         },
         {
-          "path": "frontend/src/components/BookCatalog.tsx",
+          "path": "frontend/src/components/admin/AddBookModal.tsx",
           "operation": "modify",
-          "description": "Verify that the BookCatalog component correctly consumes the data from useGetAllBooks hook. Ensure loading states, error states, and empty states are properly handled. Confirm that book count display ('Showing X of Y books') correctly reflects the filtered results length and total books length. Verify search and category filtering logic produces the correct filtered array before rendering book cards."
+          "description": "Verify and fix the modal's open/close state handling. Ensure the Dialog component from shadcn/ui is correctly configured with open and onOpenChange props. Check that all form fields (title, author, category, ISBN, copies, description) are properly bound to form state with onChange handlers. Ensure form validation runs before submission. Fix the submit handler to call the useAddBook mutation hook, handle success by closing the modal and invalidating the books query, and display error messages on failure. Add proper loading state during submission."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Fix Student Dashboard tabs so Browse Books and My Borrowed Books render correctly",
+      "summary": "Fix the Manage Users button/tab in AdminDashboard so clicking it switches to ManageUsersTab and displays the full user list with working search",
       "acceptanceCriteria": [
-        "Navigating to `/dashboard` renders the StudentDashboard page without a blank screen",
-        "The 'Browse Books' tab displays the book catalog with data",
-        "The 'My Borrowed Books' tab displays the user's active and historical borrowings",
-        "No console errors related to undefined actor methods or missing routes"
+        "Clicking 'Manage Users' in the AdminDashboard sidebar/tab bar navigates to the ManageUsersTab without errors.",
+        "The ManageUsersTab renders a table of all users fetched from the backend.",
+        "Search input in ManageUsersTab correctly filters the displayed user list.",
+        "Loading and error states are handled gracefully."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/StudentDashboard.tsx",
+          "path": "frontend/src/pages/AdminDashboard.tsx",
           "operation": "modify",
-          "description": "Verify that the StudentDashboard page component correctly mounts and renders both tabs. Ensure the BookCatalog component is rendered in the 'Browse Books' tab and BorrowedBooksList is rendered in the 'My Borrowed Books' tab. Check that the component properly handles loading and error states for the user profile query (useGetCallerUserProfile). Confirm no undefined references or missing imports."
+          "description": "Fix the tab navigation to correctly set activeTab to 'users' when the Manage Users button/tab is clicked. Ensure the button onClick handler updates the activeTab state. Verify that when activeTab === 'users', the ManageUsersTab component is rendered in the main content area. Check that the ManageUsersTab component is correctly imported and that no conditional logic prevents it from rendering."
         },
         {
-          "path": "frontend/src/components/BorrowedBooksList.tsx",
+          "path": "frontend/src/components/admin/ManageUsersTab.tsx",
           "operation": "modify",
-          "description": "Review the BorrowedBooksList component to ensure it correctly calls useGetMyBorrowHistory and useGetAllBooks hooks. Verify that the component properly maps book IDs to book details and handles cases where book data might be missing. Ensure loading skeletons and empty states are displayed appropriately."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Fix the useGetMyBorrowHistory hook to ensure it correctly calls the backend actor method `getMyBorrowHistory`. Verify the query is enabled only when the actor is available and the user is authenticated. Ensure proper error handling and retry logic."
+          "description": "Verify the useGetAllUsers hook is correctly called and that the returned data is properly mapped to the table rows. Ensure the search input state is wired to filter the displayed users array by name, email, or principal. Fix any issues with the table rendering logic, ensuring all columns (name, email, principal, role, join date) are displayed. Add proper loading skeletons while data is fetching and error state handling if the query fails. Ensure the search filter logic is case-insensitive and works across all relevant fields."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Fix Admin Dashboard so all tabs load and display data correctly",
+      "summary": "Add a book file upload field to AddBookModal and EditBookModal allowing admins to select and upload PDF/ePub files, with the file content stored as a blob on the backend and UI feedback for filename, progress, and success/error",
       "acceptanceCriteria": [
-        "Navigating to `/admin` as an admin user renders the AdminDashboard with sidebar and tabs",
-        "The Overview tab displays stat cards with real data (total books, users, borrowed, overdue)",
-        "The Manage Books tab lists all books with add/edit/delete actions functional",
-        "The Manage Users tab lists all registered users",
-        "The Borrow Records tab lists all borrow records with correct status indicators",
-        "Non-admin users are redirected away from `/admin`"
+        "The AddBookModal contains a file input that accepts PDF and ePub files.",
+        "After selecting a file, the filename is displayed next to the input.",
+        "On form submission, the file bytes are sent to the backend and stored as an optional blob on the book record.",
+        "The backend Motoko actor stores an optional file blob field on the Book type and exposes an uploadBookFile or equivalent update call.",
+        "A success indicator is shown when the upload completes; an error message is shown on failure.",
+        "Existing books without a file are not affected by the schema change."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "path": "frontend/src/components/admin/AddBookModal.tsx",
           "operation": "modify",
-          "description": "Verify that the AdminDashboard page component is properly protected by the admin role guard via ProtectedRoute. Ensure all four tabs (Overview, Manage Books, Manage Users, Borrow Records) are correctly wired and render their respective components. Check that the sidebar navigation and tab switching logic works correctly without console errors."
+          "description": "Add a file input field below the description field that accepts .pdf and .epub file types. Add form state to track the selected file (File object) and display the selected filename when a file is chosen. Import ExternalBlob from the backend types. On form submission, if a file is selected, read it as an ArrayBuffer using FileReader, convert to Uint8Array, create an ExternalBlob via ExternalBlob.fromBytes(), and attach a progress callback using withUploadProgress() to update a progress state variable. Include the ExternalBlob in the BookCreateData payload passed to the useAddBook mutation. Display a progress indicator (percentage) while the file is uploading. Show a success message when the upload completes and an error message if it fails. Ensure the file field is optional and the form can be submitted without a file."
         },
         {
-          "path": "frontend/src/components/admin/OverviewTab.tsx",
+          "path": "frontend/src/components/admin/EditBookModal.tsx",
           "operation": "modify",
-          "description": "Review the OverviewTab component to ensure it correctly calls useGetDashboardStats and useGetActiveUserCount hooks. Verify that stat cards display real data from the backend. Ensure loading states and error handling are properly implemented. Confirm AnimatedCounter components receive correct values."
-        },
-        {
-          "path": "frontend/src/components/admin/ManageBooksTab.tsx",
-          "operation": "modify",
-          "description": "Verify that ManageBooksTab correctly calls useGetAllBooks hook and displays books in a searchable, paginated table. Ensure add, edit, and delete actions are properly wired to their respective modals and mutations (useAddBook, useEditBook, useDeleteBook). Confirm role-based access control is enforced."
-        },
-        {
-          "path": "frontend/src/components/admin/ManageUsersTab.tsx",
-          "operation": "modify",
-          "description": "Review ManageUsersTab to ensure it correctly calls useGetAllUsers hook and displays users in a searchable table. Verify that user data (name, email, principal, role, join date) is properly mapped and rendered. Ensure loading and empty states are handled."
-        },
-        {
-          "path": "frontend/src/components/admin/BorrowRecordsTab.tsx",
-          "operation": "modify",
-          "description": "Verify that BorrowRecordsTab correctly calls useGetAllBorrowRecords and useGetAllBooks hooks. Ensure borrow records are displayed with correct status indicators (active, returned, overdue). Confirm search and filter functionality works as expected. Verify proper mapping of book IDs to book titles."
+          "description": "Add a file input field similar to AddBookModal. If the book being edited already has a file, display a message showing the current file exists (e.g., 'Current file: Uploaded') and allow the admin to optionally select a new file to replace it. Track the selected file in form state and display the new filename when chosen. On form submission, if a new file is selected, read it as an ArrayBuffer, convert to Uint8Array, create an ExternalBlob with progress tracking, and include it in the BookCreateData payload. If no new file is selected, preserve the existing file reference from the book prop. Display progress, success, and error states as in AddBookModal. Verify the blob-storage component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Fix all admin-related query hooks (useGetDashboardStats, useGetAllUsers, useGetAllBorrowRecords, useGetActiveUserCount) to ensure they correctly call their corresponding backend actor methods. Verify queries are enabled only when the actor is available and the user has admin role. Ensure proper error handling and data transformation where needed."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Fix actor initialization to ensure it's available before queries run",
-      "acceptanceCriteria": [
-        "The actor is initialized and available before dependent queries run",
-        "React Query hooks do not fire with an undefined actor",
-        "All queries transition from 'loading' to 'success' with data once the user is authenticated"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Review all query and mutation hooks in useQueries.ts to ensure they properly check for actor availability using `enabled: !!actor && !isFetching`. Verify that hooks correctly handle the case where actor is null/undefined and wait for it to be initialized before executing queries. Ensure consistent error handling across all hooks. Add proper TypeScript null checks where needed."
-        },
-        {
-          "path": "frontend/src/components/BookCatalog.tsx",
-          "operation": "modify",
-          "description": "Ensure the BookCatalog component properly handles the loading state from useGetAllBooks by checking both `isLoading` and actor fetching state. Display loading skeletons while data is being fetched. Ensure the component does not attempt to render data before the actor is initialized."
-        },
-        {
-          "path": "frontend/src/pages/StudentDashboard.tsx",
-          "operation": "modify",
-          "description": "Verify that StudentDashboard waits for the actor to be initialized before rendering tabs. Use the loading state from useGetCallerUserProfile to show a loading spinner or skeleton while the session is initializing. Ensure no component attempts to call backend capabilities before authentication is complete."
-        },
-        {
-          "path": "frontend/src/pages/AdminDashboard.tsx",
-          "operation": "modify",
-          "description": "Ensure AdminDashboard properly waits for actor initialization and role verification before rendering tabs. Display a loading state while authentication and authorization are in progress. Verify that ProtectedRoute correctly guards the admin dashboard from non-admin users."
+          "description": "Review the useAddBook and useEditBook mutation hooks to ensure they correctly serialize the BookCreateData payload including the optional file field of type ExternalBlob. Verify that the actor method signatures in backend.d.ts match (addBook and editBook both accept BookCreateData with an optional file?: ExternalBlob field). Ensure the mutations invalidate the 'books' query key on success so the book list refreshes with the new file data. No changes should be needed if the backend interface already supports the file field, but verify the type definitions are correctly imported and used."
         }
       ]
     }

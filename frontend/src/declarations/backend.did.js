@@ -8,6 +8,17 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  'method' : IDL.Text,
+  'blob_hash' : IDL.Text,
+});
+export const _CaffeineStorageRefillInformation = IDL.Record({
+  'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const _CaffeineStorageRefillResult = IDL.Record({
+  'success' : IDL.Opt(IDL.Bool),
+  'topped_up_amount' : IDL.Opt(IDL.Nat),
+});
 export const Time = IDL.Int;
 export const AnnouncementPriority = IDL.Variant({
   'normal' : IDL.Null,
@@ -19,8 +30,10 @@ export const AnnouncementCreateData = IDL.Record({
   'body' : IDL.Text,
   'priority' : AnnouncementPriority,
 });
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const BookCreateData = IDL.Record({
   'title' : IDL.Text,
+  'file' : IDL.Opt(ExternalBlob),
   'isbn' : IDL.Text,
   'description' : IDL.Text,
   'author' : IDL.Text,
@@ -51,6 +64,7 @@ export const Book = IDL.Record({
   'id' : IDL.Text,
   'title' : IDL.Text,
   'availableCopies' : IDL.Nat,
+  'file' : IDL.Opt(ExternalBlob),
   'isbn' : IDL.Text,
   'description' : IDL.Text,
   'author' : IDL.Text,
@@ -96,6 +110,32 @@ export const UserProfile = IDL.Record({
 });
 
 export const idlService = IDL.Service({
+  '_caffeineStorageBlobIsLive' : IDL.Func(
+      [IDL.Vec(IDL.Nat8)],
+      [IDL.Bool],
+      ['query'],
+    ),
+  '_caffeineStorageBlobsToDelete' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      ['query'],
+    ),
+  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [],
+      [],
+    ),
+  '_caffeineStorageCreateCertificate' : IDL.Func(
+      [IDL.Text],
+      [_CaffeineStorageCreateCertificateResult],
+      [],
+    ),
+  '_caffeineStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_CaffeineStorageRefillInformation)],
+      [_CaffeineStorageRefillResult],
+      [],
+    ),
+  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'addAnnouncement' : IDL.Func([AnnouncementCreateData], [IDL.Text], []),
   'addBook' : IDL.Func([BookCreateData], [], []),
@@ -169,6 +209,17 @@ export const idlService = IDL.Service({
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+    'method' : IDL.Text,
+    'blob_hash' : IDL.Text,
+  });
+  const _CaffeineStorageRefillInformation = IDL.Record({
+    'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const _CaffeineStorageRefillResult = IDL.Record({
+    'success' : IDL.Opt(IDL.Bool),
+    'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
   const Time = IDL.Int;
   const AnnouncementPriority = IDL.Variant({
     'normal' : IDL.Null,
@@ -180,8 +231,10 @@ export const idlFactory = ({ IDL }) => {
     'body' : IDL.Text,
     'priority' : AnnouncementPriority,
   });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
   const BookCreateData = IDL.Record({
     'title' : IDL.Text,
+    'file' : IDL.Opt(ExternalBlob),
     'isbn' : IDL.Text,
     'description' : IDL.Text,
     'author' : IDL.Text,
@@ -212,6 +265,7 @@ export const idlFactory = ({ IDL }) => {
     'id' : IDL.Text,
     'title' : IDL.Text,
     'availableCopies' : IDL.Nat,
+    'file' : IDL.Opt(ExternalBlob),
     'isbn' : IDL.Text,
     'description' : IDL.Text,
     'author' : IDL.Text,
@@ -257,6 +311,32 @@ export const idlFactory = ({ IDL }) => {
   });
   
   return IDL.Service({
+    '_caffeineStorageBlobIsLive' : IDL.Func(
+        [IDL.Vec(IDL.Nat8)],
+        [IDL.Bool],
+        ['query'],
+      ),
+    '_caffeineStorageBlobsToDelete' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        ['query'],
+      ),
+    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [],
+        [],
+      ),
+    '_caffeineStorageCreateCertificate' : IDL.Func(
+        [IDL.Text],
+        [_CaffeineStorageCreateCertificateResult],
+        [],
+      ),
+    '_caffeineStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_CaffeineStorageRefillInformation)],
+        [_CaffeineStorageRefillResult],
+        [],
+      ),
+    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'addAnnouncement' : IDL.Func([AnnouncementCreateData], [IDL.Text], []),
     'addBook' : IDL.Func([BookCreateData], [], []),

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Search, Users } from 'lucide-react';
+import { Search, Users, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -24,7 +25,7 @@ function formatDate(ns: bigint): string {
 
 export default function ManageUsersTab() {
   const [search, setSearch] = useState('');
-  const { data: users = [], isLoading, error } = useGetAllUsers();
+  const { data: users = [], isLoading, error, refetch, isFetching } = useGetAllUsers();
 
   const filteredUsers = users.filter(([principal, profile]) => {
     const q = search.toLowerCase();
@@ -37,10 +38,13 @@ export default function ManageUsersTab() {
 
   if (isLoading) {
     return (
-      <div className="space-y-2">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-12 rounded-lg" />
-        ))}
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-64 rounded-lg" />
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 rounded-lg" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -50,24 +54,38 @@ export default function ManageUsersTab() {
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <Users className="w-12 h-12 text-muted-foreground mb-4" />
         <p className="text-lg font-semibold">Failed to load users</p>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-1 max-w-sm">
           {error instanceof Error ? error.message : 'An unexpected error occurred'}
         </p>
+        <Button
+          variant="outline"
+          className="mt-4 flex items-center gap-2"
+          onClick={() => refetch()}
+          disabled={isFetching}
+        >
+          <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
+          Retry
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          className="pl-9"
-          placeholder="Search users..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {/* Search + count */}
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="relative max-w-sm flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            className="pl-9"
+            placeholder="Search by name, email, or principal…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <span className="text-sm text-muted-foreground whitespace-nowrap">
+          {filteredUsers.length} of {users.length} user{users.length !== 1 ? 's' : ''}
+        </span>
       </div>
 
       {/* Table */}

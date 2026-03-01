@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
+import { useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 import type {
   Book,
   BookCreateData,
@@ -186,6 +188,7 @@ export function useCancelReservation() {
 export function useGetAllReservations() {
   const { actor, isFetching: actorFetching } = useActor();
   const { identity } = useInternetIdentity();
+  const { isAdminPasswordLogin } = useContext(AuthContext);
 
   return useQuery<Reservation[]>({
     queryKey: ['allReservations'],
@@ -193,7 +196,7 @@ export function useGetAllReservations() {
       if (!actor) throw new Error('Actor not available');
       return actor.getAllReservations();
     },
-    enabled: !!actor && !actorFetching && !!identity,
+    enabled: !!actor && !actorFetching && (!!identity || isAdminPasswordLogin),
     retry: 1,
     staleTime: 30_000,
   });
@@ -423,6 +426,7 @@ export { useGetUserRole as useGetCallerUserRole };
 export function useGetDashboardStats() {
   const { actor, isFetching: actorFetching } = useActor();
   const { identity } = useInternetIdentity();
+  const { isAdminPasswordLogin } = useContext(AuthContext);
 
   return useQuery<{
     totalBooks: bigint;
@@ -435,7 +439,7 @@ export function useGetDashboardStats() {
       if (!actor) throw new Error('Actor not available');
       return actor.getDashboardStats();
     },
-    enabled: !!actor && !actorFetching && !!identity,
+    enabled: !!actor && !actorFetching && (!!identity || isAdminPasswordLogin),
     retry: 1,
     staleTime: 30_000,
     refetchInterval: 60_000,
@@ -447,6 +451,7 @@ export function useGetDashboardStats() {
 export function useGetAllUsers() {
   const { actor, isFetching: actorFetching } = useActor();
   const { identity } = useInternetIdentity();
+  const { isAdminPasswordLogin } = useContext(AuthContext);
 
   return useQuery<[import('@dfinity/principal').Principal, UserProfile][]>({
     queryKey: ['allUsers'],
@@ -455,7 +460,7 @@ export function useGetAllUsers() {
       const result = await actor.getAllUsers();
       return result as [import('@dfinity/principal').Principal, UserProfile][];
     },
-    enabled: !!actor && !actorFetching && !!identity,
+    enabled: !!actor && !actorFetching && (!!identity || isAdminPasswordLogin),
     retry: 1,
     staleTime: 30_000,
   });
@@ -466,6 +471,7 @@ export function useGetAllUsers() {
 export function useGetAllBorrowRecords() {
   const { actor, isFetching: actorFetching } = useActor();
   const { identity } = useInternetIdentity();
+  const { isAdminPasswordLogin } = useContext(AuthContext);
 
   return useQuery<[import('@dfinity/principal').Principal, BorrowRecord[]][]>({
     queryKey: ['allBorrowRecords'],
@@ -474,7 +480,7 @@ export function useGetAllBorrowRecords() {
       const result = await actor.getAllBorrowRecords();
       return result as [import('@dfinity/principal').Principal, BorrowRecord[]][];
     },
-    enabled: !!actor && !actorFetching && !!identity,
+    enabled: !!actor && !actorFetching && (!!identity || isAdminPasswordLogin),
     retry: 1,
     staleTime: 30_000,
   });
@@ -485,6 +491,7 @@ export function useGetAllBorrowRecords() {
 export function useGetActiveUserCount() {
   const { actor, isFetching: actorFetching } = useActor();
   const { identity } = useInternetIdentity();
+  const { isAdminPasswordLogin } = useContext(AuthContext);
 
   return useQuery<bigint>({
     queryKey: ['activeUserCount'],
@@ -492,10 +499,10 @@ export function useGetActiveUserCount() {
       if (!actor) throw new Error('Actor not available');
       return actor.getActiveUserCount();
     },
-    enabled: !!actor && !actorFetching && !!identity,
+    enabled: !!actor && !actorFetching && (!!identity || isAdminPasswordLogin),
     retry: 1,
+    staleTime: 10_000,
     refetchInterval: 30_000,
-    staleTime: 25_000,
   });
 }
 

@@ -1,102 +1,80 @@
 {
   "kind": "build_request",
-  "title": "Fix missing features — Book Catalog empty, Student/Admin Dashboard not rendering data",
+  "title": "Fix Add Book & Manage Users buttons, and add book file upload for admins",
   "projectName": "VEMU Library Portal",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the Book Catalog on the Student Dashboard so that books stored in the backend are fetched and displayed correctly. The page currently shows 'Showing 0 of 0 books' and 'No books found' even when books exist in the canister. Ensure the `getAllBooks` backend call is wired properly through the React Query hook in `useQueries.ts` and that the `BookCatalog` component receives and renders the data.",
-      "target": "both",
+      "text": "Fix the Add Book button in the ManageBooksTab admin panel so that clicking it reliably opens the AddBookModal dialog. The modal must render correctly, all form fields (title, author, category, ISBN, copies, description) must be interactive, and submitting the form must invoke the add book mutation and close the modal on success.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-10"
         ],
         "quotes": [
-          "see this no features are added"
+          "fix the Add Book and Manage Users buttons"
         ]
       },
       "acceptanceCriteria": [
-        "Books stored in the backend canister are returned by the `getAllBooks` query",
-        "The Book Catalog on the Student Dashboard shows the correct book count (e.g., 'Showing X of Y books')",
-        "Individual book cards are rendered with title, author, category, and borrow/reserve actions",
-        "Search and category filter controls produce correct filtered results"
+        "Clicking 'Add Book' in ManageBooksTab opens the AddBookModal without errors.",
+        "All form fields in AddBookModal are editable and validated before submission.",
+        "Submitting the form calls the backend add-book mutation and the book list refreshes on success.",
+        "The modal closes after a successful add and shows an error message on failure."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Fix the Student Dashboard tabs so that both the 'Browse Books' tab (BookCatalog) and the 'My Borrowed Books' tab (BorrowedBooksList) render content correctly. Verify that the route `/dashboard` is properly registered in `App.tsx`, the `StudentDashboard` page component is mounted, and all required React Query hooks (`useGetAllBooks`, `useGetBorrowedBooks`) resolve without errors.",
+      "text": "Fix the Manage Users button/tab in the AdminDashboard so that clicking it correctly switches to the ManageUsersTab. The tab must load and display the full list of registered users (name, email, principal, role, join date) fetched via the useGetAllUsers hook, with a working search input.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-10"
+        ],
+        "quotes": [
+          "fix the Add Book and Manage Users buttons"
         ]
       },
       "acceptanceCriteria": [
-        "Navigating to `/dashboard` renders the StudentDashboard page without a blank screen",
-        "The 'Browse Books' tab displays the book catalog with data",
-        "The 'My Borrowed Books' tab displays the user's active and historical borrowings",
-        "No console errors related to undefined actor methods or missing routes"
+        "Clicking 'Manage Users' in the AdminDashboard sidebar/tab bar navigates to the ManageUsersTab without errors.",
+        "The ManageUsersTab renders a table of all users fetched from the backend.",
+        "Search input in ManageUsersTab correctly filters the displayed user list.",
+        "Loading and error states are handled gracefully."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Fix the Admin Dashboard so that all four tabs (Overview, Manage Books, Manage Users, Borrow Records) load and display data. Verify the `/admin` route is registered in `App.tsx`, the `AdminDashboard` page is protected by the admin role guard, and all React Query hooks used by admin tab components (`useGetAllBooks`, `useGetAllUsers`, `useGetAllBorrowRecords`, `useGetStats`) are correctly wired to the backend actor methods.",
+      "text": "Add a book file upload field to the AddBookModal (and EditBookModal where appropriate) so admins can select and upload a book file (PDF or ePub) from their device. The uploaded file content should be stored on the backend as a blob associated with the book record. The backend actor must be updated to store an optional file blob per book. The upload field should display the selected filename and a progress/success indicator.",
       "target": "both",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-10"
+        ],
+        "quotes": [
+          "allow admins to upload book files",
+          "it takes open file and upload file of book in our website"
         ]
       },
       "acceptanceCriteria": [
-        "Navigating to `/admin` as an admin user renders the AdminDashboard with sidebar and tabs",
-        "The Overview tab displays stat cards with real data (total books, users, borrowed, overdue)",
-        "The Manage Books tab lists all books with add/edit/delete actions functional",
-        "The Manage Users tab lists all registered users",
-        "The Borrow Records tab lists all borrow records with correct status indicators",
-        "Non-admin users are redirected away from `/admin`"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Ensure all backend actor methods required by the frontend are exposed in `backend/main.mo`. Audit the methods called by `useQueries.ts` (e.g., `getAllBooks`, `getAllUsers`, `getAllBorrowRecords`, `borrowBook`, `returnBook`, `reserveBook`, `cancelReservation`, `approveReservation`, `rejectReservation`, `addBook`, `editBook`, `deleteBook`, `getAllAnnouncements`, `getAllDigitalResources`, etc.) and confirm they are all implemented and publicly accessible in the actor.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All methods called by `useQueries.ts` are present and public in `backend/main.mo`",
-        "Each method returns the correct type matching the frontend's expected shape",
-        "No runtime 'method not found' errors occur when the frontend calls the actor"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Fix the actor initialization in `useActor.ts` so the authenticated actor is properly created and cached before any query hooks attempt to call backend methods. Ensure the actor is passed correctly to all query and mutation hooks in `useQueries.ts` so no hook silently skips fetching due to a null or undefined actor reference.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The actor is initialized and available before dependent queries run",
-        "React Query hooks do not fire with an undefined actor",
-        "All queries transition from 'loading' to 'success' with data once the user is authenticated"
+        "The AddBookModal contains a file input that accepts PDF and ePub files.",
+        "After selecting a file, the filename is displayed next to the input.",
+        "On form submission, the file bytes are sent to the backend and stored as an optional blob on the book record.",
+        "The backend Motoko actor stores an optional file blob field on the Book type and exposes an uploadBookFile or equivalent update call.",
+        "A success indicator is shown when the upload completes; an error message is shown on failure.",
+        "Existing books without a file are not affected by the schema change."
       ]
     }
   ],
   "constraints": [
-    "Do not change the existing URL routes (/dashboard, /admin)",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
-    "Preserve existing role-based access control logic"
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "All backend Motoko logic must remain in the single actor in backend/main.mo.",
+    "Generate migration.mo if the Book type schema changes to add the file blob field."
   ],
   "nonGoals": [
-    "Adding new features beyond what is already implemented in the codebase",
-    "Redesigning the UI or changing the visual theme",
-    "Adding new backend data models or schema changes"
+    "Adding student-facing file download functionality (out of scope for this request).",
+    "Changing the authentication or role-based access control logic.",
+    "Modifying the digital resources or announcements features.",
+    "Adding external file storage — files must be stored directly in the canister."
   ],
   "imageRequirements": {
     "required": [],

@@ -1,66 +1,45 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-27T07:53:30.205Z",
-  "summary": "The diff implements substantial fixes across frontend components and the backend actor. Most requirements are addressed: BookCatalog, BorrowedBooksList, StudentDashboard, AdminDashboard tabs, useQueries.ts hooks, AuthContext, and backend/main.mo are all modified. However, the diff does not include changes to App.tsx (route registration verification), which is a critical part of REQ-2 and REQ-3. The backend/main.mo is truncated so full audit of all required methods cannot be confirmed for REQ-4.",
+  "generatedAt": "2026-03-01T16:59:25.771Z",
+  "summary": "The diff addresses all three requirements: REQ-1 (AddBookModal fix), REQ-2 (ManageUsersTab fix), and REQ-3 (file upload). The implementation covers the modal dialog, form fields, user table with search, backend Book type with optional file blob, migration.mo, and frontend file upload UI. A few specific acceptance criteria have gaps worth noting.",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "Verify that the route /dashboard is properly registered in App.tsx and the StudentDashboard page component is mounted.",
-      "reason": "App.tsx does not appear in the diff at all. There is no evidence the /dashboard route registration was verified or fixed in App.tsx.",
-      "evidence": []
-    },
-    {
       "id": "REQ-3",
-      "requirement": "Verify the /admin route is registered in App.tsx and the AdminDashboard page is protected by the admin role guard.",
-      "reason": "App.tsx does not appear in the diff. There is no evidence the /admin route registration was verified or fixed in App.tsx.",
-      "evidence": []
-    },
-    {
-      "id": "REQ-4",
-      "requirement": "All backend actor methods required by the frontend are exposed in backend/main.mo, including getAllAnnouncements, getAllDigitalResources, reserveBook, cancelReservation, approveReservation, rejectReservation.",
-      "reason": "backend/main.mo is truncated in the diff. Several methods cannot be confirmed present due to truncation. Additionally useQueries.ts calls getAllBooksSortedByTitle rather than getAllBooks, making the method name mapping unclear.",
+      "requirement": "The AddBookModal file input must accept PDF and ePub files (accept attribute restricting file types).",
+      "reason": "The AddBookModal.tsx is truncated and does not show an explicit 'accept' attribute on the file input element restricting to PDF/ePub. This cannot be confirmed from the available diff.",
       "evidence": [
-        "backend/main.mo",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/admin/AddBookModal.tsx"
       ]
     },
     {
-      "id": "REQ-5",
-      "requirement": "Fix the actor initialization in useActor.ts so the authenticated actor is properly created and cached before any query hooks attempt to call backend methods.",
-      "reason": "useActor.ts does not appear in the diff at all. The diff partially addresses this by adding enabled guards and null checks in useQueries.ts, but the root actor initialization fix in useActor.ts itself is absent.",
+      "id": "REQ-3",
+      "requirement": "The backend Motoko actor must expose an uploadBookFile or equivalent dedicated update call.",
+      "reason": "The backend main.mo is truncated and no dedicated uploadBookFile endpoint is visible. The file blob appears to be stored only as part of addBook/editBook via the BookCreateData, rather than through a separate upload call as specified in the AC.",
       "evidence": [
-        "frontend/src/hooks/useQueries.ts"
+        "backend/main.mo"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "useGetActiveUserCount hook used in OverviewTab to display Members Currently Online with a 30-second refresh",
-      "reason": "The build request does not mention an active user count or online members feature. The required hooks listed in REQ-3 are useGetAllBooks, useGetAllUsers, useGetAllBorrowRecords, and useGetStats. useGetActiveUserCount is not among them.",
+      "description": "An external blob storage module (blob-storage/Storage and blob-storage/Mixin) is introduced with an ExternalBlob type used for the file field.",
+      "reason": "The build request explicitly states files must be stored directly in the canister and no external file storage should be added. The use of Storage.ExternalBlob and MixinStorage suggests a separate storage abstraction layer was introduced that was not requested.",
       "evidence": [
-        "frontend/src/components/admin/OverviewTab.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "backend/main.mo",
+        "frontend/src/components/admin/AddBookModal.tsx"
       ]
     }
   ],
-  "confidence": 0.72,
+  "confidence": 0.7,
   "changed_files": [
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/BookCatalog.tsx",
-    "frontend/src/components/BorrowedBooksList.tsx",
-    "frontend/src/components/ProfileSetupModal.tsx",
     "frontend/src/components/admin/AddBookModal.tsx",
-    "frontend/src/components/admin/BorrowRecordsTab.tsx",
-    "frontend/src/components/admin/ManageBooksTab.tsx",
     "frontend/src/components/admin/ManageUsersTab.tsx",
-    "frontend/src/components/admin/OverviewTab.tsx",
-    "frontend/src/contexts/AuthContext.tsx",
     "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/AdminDashboard.tsx",
-    "frontend/src/pages/DigitalResources.tsx",
-    "frontend/src/pages/StudentDashboard.tsx",
     "project_state.json"
   ]
 }

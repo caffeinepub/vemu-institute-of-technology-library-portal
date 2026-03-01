@@ -34,9 +34,10 @@ export default function AdminDashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const { identity, isInitializing } = useInternetIdentity();
-  const { userRole, isLoading: roleLoading } = useContext(AuthContext);
+  const { userRole, isLoading: roleLoading, isAdminPasswordLogin } = useContext(AuthContext);
 
-  const isAuthenticated = !!identity;
+  // Admin is authenticated either via Internet Identity OR via admin password login
+  const isAuthenticated = !!identity || isAdminPasswordLogin;
 
   // Show loading while initializing
   if (isInitializing || roleLoading) {

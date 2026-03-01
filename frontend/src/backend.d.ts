@@ -7,6 +7,13 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export class ExternalBlob {
+    getBytes(): Promise<Uint8Array<ArrayBuffer>>;
+    getDirectURL(): string;
+    static fromURL(url: string): ExternalBlob;
+    static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
+    withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
+}
 export type Time = bigint;
 export interface DigitalResource {
     id: string;
@@ -14,21 +21,6 @@ export interface DigitalResource {
     title: string;
     description: string;
     addedAt: Time;
-    category: string;
-}
-export interface BorrowRecord {
-    id: string;
-    borrowedAt: Time;
-    dueDate: Time;
-    bookId: string;
-    returnedAt?: Time;
-}
-export interface BookCreateData {
-    title: string;
-    isbn: string;
-    description: string;
-    author: string;
-    totalCopies: bigint;
     category: string;
 }
 export interface Reservation {
@@ -44,12 +36,29 @@ export interface Book {
     id: string;
     title: string;
     availableCopies: bigint;
+    file?: ExternalBlob;
     isbn: string;
     description: string;
     author: string;
     totalCopies: bigint;
     addedAt: Time;
     category: string;
+}
+export interface BookCreateData {
+    title: string;
+    file?: ExternalBlob;
+    isbn: string;
+    description: string;
+    author: string;
+    totalCopies: bigint;
+    category: string;
+}
+export interface BorrowRecord {
+    id: string;
+    borrowedAt: Time;
+    dueDate: Time;
+    bookId: string;
+    returnedAt?: Time;
 }
 export interface Announcement {
     id: string;

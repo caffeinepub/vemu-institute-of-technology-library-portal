@@ -1,18 +1,22 @@
 import Time "mo:core/Time";
-import Runtime "mo:core/Runtime";
 import Map "mo:core/Map";
 import Array "mo:core/Array";
 import Text "mo:core/Text";
 import Iter "mo:core/Iter";
+import Runtime "mo:core/Runtime";
 import Order "mo:core/Order";
 import Principal "mo:core/Principal";
 import Nat "mo:core/Nat";
-
-
+import Storage "blob-storage/Storage";
+import MixinStorage "blob-storage/Mixin";
+import Migration "migration";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
+(with migration = Migration.run)
 actor {
+  include MixinStorage();
+
   public type Book = {
     id : Text;
     title : Text;
@@ -22,6 +26,7 @@ actor {
     totalCopies : Nat;
     availableCopies : Nat;
     description : Text;
+    file : ?Storage.ExternalBlob;
     addedAt : Time.Time;
   };
 
@@ -32,6 +37,7 @@ actor {
     isbn : Text;
     totalCopies : Nat;
     description : Text;
+    file : ?Storage.ExternalBlob;
   };
 
   public type BorrowRecord = {
@@ -129,6 +135,8 @@ actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
+  // ── Initialization ─────────────────────────────────────────────────────────
+
   public shared ({ caller }) func initialize(adminToken : Text, userProvidedToken : Text) : async () {
     AccessControl.initialize(accessControlState, caller, adminToken, userProvidedToken);
   };
@@ -192,6 +200,7 @@ actor {
       totalCopies = bookCreateData.totalCopies;
       availableCopies = bookCreateData.totalCopies;
       description = bookCreateData.description;
+      file = bookCreateData.file;
       addedAt = Time.now();
     };
 
@@ -215,6 +224,7 @@ actor {
           totalCopies = bookCreateData.totalCopies;
           availableCopies = book.availableCopies;
           description = bookCreateData.description;
+          file = bookCreateData.file;
           addedAt = book.addedAt;
         };
         books.add(bookId, updatedBook);
@@ -257,6 +267,7 @@ actor {
           totalCopies = book.totalCopies;
           availableCopies = book.availableCopies - 1;
           description = book.description;
+          file = book.file;
           addedAt = book.addedAt;
         };
         books.add(bookId, newBook);
@@ -303,6 +314,7 @@ actor {
           totalCopies = book.totalCopies;
           availableCopies = book.availableCopies + 1;
           description = book.description;
+          file = book.file;
           addedAt = book.addedAt;
         };
         books.add(bookId, newBook);
@@ -424,6 +436,7 @@ actor {
               totalCopies = book.totalCopies;
               availableCopies = book.availableCopies - 1;
               description = book.description;
+              file = book.file;
               addedAt = book.addedAt;
             };
             books.add(reservation.bookId, updatedBook);
@@ -674,4 +687,3 @@ actor {
     };
   };
 };
-
